@@ -7,7 +7,7 @@ local ROM = http:GetAsync(ROM_URL)
 
 -- No more bit 32 ,only byte()
 print(#ROM)
-for instruction = 0x0, 0x49F, 2 do
+for instruction = 0x0, 0x49E, 2 do
 	local b1, b2 = ROM:sub(instruction+1, instruction+1):byte(),ROM:sub(instruction+2, instruction+2):byte()
 	print(b1, b2, instruction/2)
 	local code = b2 + (b1 * 2) -- im dumb

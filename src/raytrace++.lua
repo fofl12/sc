@@ -1,14 +1,25 @@
 local TWIST = true
-local RES_X = 120
-local RES_Y = 90
-local PIXEL_SIZE = Vector3.one * 0.1
+local RES_X = 160
+local RES_Y = 120
+local PIXEL_SIZE = Vector3.one * 0.1 -- requires RENDER_MODE to be 'Part'
 local DIMUL = 3
 local LENIENT = false
-local PHOTO_BOOK = true -- Requires RENDER_MODE to be Text
+local ALBUM = true -- requires RENDER_MODE to be 'Text' to be able to visualize renders
 local RENDER_MODE = 'Text'
+local MULTI_LIGHT = false -- enable multiple light sources
+local SHADOWS = true
+local RENDER_PARAMS = {
+	rowsplit = 1
+}
+
+local http = game:GetService('HttpService')
+local Bitmap = loadstring(http:GetAsync('https://raw.githubusercontent.com/max1220/lua-bitmap/master/bitmap.lua'))()
+local album = {}
 
 local tool = Instance.new('Tool')
-tool.Name = 'Camera'
+tool.Name = 'Ray Tracer'
+tool.TextureId = 'rbxassetid://725416435'
+tool.ToolTip = 'Caught in 4K'
 local statelabel
 local handle
 do
@@ -51,16 +62,21 @@ local matmap = {
 	[Enum.Material.Water] = Enum.Material.Glass,
 	[Enum.Material.Grass] = Enum.Material.Grass
 }
+local lightindex = {}
 setmetatable(matmap, {__index=function(t,k)return k end})
 
-local function cast(origin, dir, layer, raymap, lx, ly)
+local function cast(origin, dir, layer)
 	local ray = workspace:Raycast(origin, dir * 500)
 	local color, mat, dist
-	if layer > 8 then
-		ray = nil
-	end
-	if layer == 6 and not LENIENT then
+	-- if layer > 8 then
+	-- 	ray = nil
+	-- end
+	if layer % 6 == 0 and not LENIENT then
 		task.wait()
+	end
+	if layer % 6000 == 0 then
+		warn('Passed 6000 layer milestone, the target is unreachable. Skipping...')
+		ray = nil
 	end
 	if ray then
 		if ray.Instance == workspace.Terrain then
@@ -88,46 +104,61 @@ local function cast(origin, dir, layer, raymap, lx, ly)
 				local res = {cast(ray.Position, dir, layer + 1)}
 				color = color:lerp(res[1], ray.Instance.Transparency)
 			end
-			local sparkles = ray.Instance:FindFirstChildWhichIsA('Sparkles')
-			if sparkles and raymap and sparkles.Enabled and math.random() > 0.7 then
-				local nx = lx + math.random(-20, 20)
-				local ny = -ly + math.random(-20, 20)
-				if not raymap[nx] then
-					raymap[nx] = {}
+			if MULTI_LIGHT then
+				for _, light in next, lightindex do
+					local dist = (light.Parent.Position - ray.Position).Magnitude
+					if dist < light.Range then
+						color = color:lerp(light.Color, math.sqrt(1 - dist / light.Range) * light.Brightness)
+					end
 				end
-				raymap[nx][ny] = {sparkles.SparkleColor, Enum.Material.Neon}
 			end
 		end
-		local dot = (-sunormal):Dot(ray.Normal)
-		color = color:lerp(Color3.new(.2,.2,.2), (dot+1)/2)
-		local shadowRay = workspace:Raycast(ray.Position, sunormal * 30)
-		if shadowRay and shadowRay.Instance ~= ray.Instance and shadowRay.Instance.CastShadow then
-			color = color:lerp(Color3.new(.2,.2,.2), 1 - (shadowRay.Distance / 30))
+		if SHADOWS then
+			local dot = (-sunormal):Dot(ray.Normal)
+			color = color:lerp(Color3.new(.2,.2,.2), (dot+1)/2)
+			if dot < 0 then
+				local shadowRay = workspace:Raycast(ray.Position, sunormal * 50)
+				if shadowRay and shadowRay.Instance ~= ray.Instance and shadowRay.Instance.CastShadow then
+					color = color:lerp(Color3.new(.2,.2,.2), 1 - (shadowRay.Distance / 50))
+				end
+			end
 		end
 	else
-		color, mat, dist = BrickColor.Blue().Color, Enum.Material.Plastic, math.huge
+		color, mat, dist = Color3.fromRGB(70,142,206):lerp(Color3.fromRGB(12,70,206), dir:Dot(Vector3.yAxis)), Enum.Material.Plastic, math.huge
 	end
 	return color, mat, dist
 end
 
 remote.OnServerEvent:Connect(function()
-	statelabel.Text = 'Firing rays'
+	statelabel.Text = 'Initializing'
 	sunormal = game.Lighting:GetSunDirection()
 	handle.Anchored = true
+	
+	if MULTI_LIGHT then
+		statelabel.Text = 'Indexing lights'
+		lightindex = {}
+		for _, light in next, workspace:GetDescendants() do
+			if light.Parent:IsA('BasePart') and light:IsA('PointLight') then
+				table.insert(lightindex, light)
+			end
+		end
+		print('Light index size: ' .. #lightindex)
+	end
 
 	local raymap = {}
+	statelabel.Text = 'Firing rays'
 	for y = -(RES_Y/2), (RES_Y/2) do
 		if not raymap[y+(RES_Y/2)] then
 			raymap[y+(RES_Y/2)] = {}
 		end
 		if LENIENT then
-			statelabel.Text = ('Loading row %i'):format(x)
+			statelabel.Text = ('Loading row %i'):format(y)
 		end
 		for x = -(RES_X/2), (RES_X/2) do
-			local cf = handle.CFrame * CFrame.fromOrientation(math.rad(y) / DIMUL, math.rad(-x) / DIMUL, TWIST and math.rad(x) / DIMUL or 0)
-			local color, mat = cast(cf.p, cf.LookVector, 1, raymap, x, y)
+			local cf = handle.CFrame * CFrame.Angles(math.rad(y) / DIMUL, math.rad(-x) / DIMUL, TWIST and math.rad(x) / DIMUL or 0)
+			local color, mat = cast(cf.p, cf.LookVector, 1)
 			if not raymap[y + (RES_Y/2)][x + (RES_X/2)] then
-				raymap[y + (RES_Y)/2][x + (RES_X/2)] = {color, mat}
+				raymap[y + (RES_Y)/2][x + (RES_X/2)] = color
 			end
 			if not LENIENT then statelabel.Text = ('Ray %i:%i loaded'):format(x, y) end
 			local shouldPause = if LENIENT then x % 2048 == 0 else x % 32 == 0
@@ -142,12 +173,12 @@ remote.OnServerEvent:Connect(function()
 	if RENDER_MODE == 'Part' then
 		for y, xl in next, raymap do
 			if LENIENT then statelabel.Text = ('Rendering column %i'):format(x) end
-			for x, vp in next, yl do
+			for x, vp in next, xl do
 				local pixel = Instance.new('WedgePart')
 				pixel.Size = PIXEL_SIZE
 				pixel.Position = offset + (Vector3.new(x, y) * PIXEL_SIZE.X)
-				pixel.Color = vp[1]
-				pixel.Material = vp[2]
+				pixel.Color = vp
+				--pixel.Material = vp[2]
 				pixel.Anchored = true
 				pixel.CanCollide = false
 				pixel.Parent = script
@@ -158,6 +189,9 @@ remote.OnServerEvent:Connect(function()
 				end
 			end
 		end
+		if ALBUM then
+			table.insert(album, {rays = raymap})
+		end
 	elseif RENDER_MODE == 'Text' then
 		local outlist = {}
 		for y, xl in ipairs(raymap) do
@@ -165,14 +199,15 @@ remote.OnServerEvent:Connect(function()
 			local out = ''
 			for x, vp in ipairs(xl) do
 				if not prev_color then
-					prev_color = vp[1]
-					out ..= ('<font color="#%s">█'):format(vp[1]:ToHex())
-				elseif prev_color == vp[1] then
+					prev_color = vp
+					out ..= ('<font color="#%s">█'):format(vp:ToHex())
+				elseif prev_color.R == vp.R and prev_color.G == vp.G and prev_color.B == vp.B then
 					out ..= '█'
 				else
-					out ..= ('</font><font color="#%s">█'):format(vp[1]:ToHex())
-			
+					out ..= ('</font><font color="#%s">█'):format(vp:ToHex())
+					prev_color = vp
 				end
+				if x % 32 == 0 then task.wait() end
 			end
 			out ..= '</font>'
 			table.insert(outlist, out)
@@ -193,19 +228,103 @@ remote.OnServerEvent:Connect(function()
 			local b = label:Clone()
 			b.Text = out
 			b.Position = UDim2.fromScale(0, (1/#outlist) * (#outlist-(i-1)))
+			if i % 32 == 0 then task.wait() end
 			b.Parent = gui
 		end
 		part.Parent = script
+		if ALBUM then
+			table.insert(album, {render = outlist, rays = raymap})
+		end
+	elseif RENDER_MODE == 'Sound' then
+		print('Creating base sound')
+		local sound = Instance.new('Sound')
+		sound.SoundId = 'rbxassetid://12221967'
+		sound.Parent = owner.Character.Head
+		if not sound.IsLoaded then sound.Loaded:Wait() end
+
+		for y, xl in ipairs(raymap) do
+			for x, vp in ipairs(xl) do
+				local h, s, v = vp:ToHSV()
+				statelabel.Text = ('Playing pixel %i:%i with pitch %.1f and volume %.1f'):format(x, y, h * 2, v * 1.5)
+				sound.PlaybackSpeed = h * 2
+				sound.Volume = v * 1.5
+				sound:Play()
+				task.wait()
+			end
+		end
+		sound:Destroy()
+
+		if ALBUM then
+			table.insert(ALBUM, {rays = raymap})
+		end
 	end
-	statelabel.Text = 'Done!'
-	task.delay(3, function()
-		if statelabel.Text ~= 'Done!' then return end
-		statelabel.Text = 'Ready'
-	end)
+	if ALBUM then
+		statelabel.Text = 'Saved at #' .. #album
+	else
+		statelabel.Text = 'Done!'
+	end
 end)
 
+local prevcommand
 owner.Chatted:Connect(function(c)
+	if c == '%^' then
+		c = prevcommand
+	else
+		prevcommand = c
+	end
 	if c == '%discard' then
 		script:ClearAllChildren()
+	elseif ALBUM and c == '%clearalbum' then
+		table.clear(album)
+	elseif ALBUM and c:sub(1, 6) == '%album' then
+		local outlist = album[tonumber(c:sub(7, 8))].render
+
+		local part = Instance.new('Part')
+		part.Size = Vector3.new(5, 5, 0.1)
+		part.Position = owner.Character.Head.Position
+		part.Anchored = true
+		part.CanCollide = false
+		local gui = Instance.new('SurfaceGui', part)
+		local label = Instance.new('TextBox')
+		label.RichText = true
+		label.Font = 'Code'
+		label.Size = UDim2.fromScale(1, 1/#outlist)
+		label.TextScaled = true
+		label.BackgroundTransparency = 1
+		for i, out in next, outlist do
+			local b = label:Clone()
+			b.Text = out
+			b.Position = UDim2.fromScale(0, (1/#outlist) * (#outlist-(i-1)))
+			if i % 32 == 0 then task.wait() end
+			b.Parent = gui
+		end
+		part.Parent = script
+	elseif ALBUM and c:sub(1, 7) == '%upload' then
+		local outlist = album[tonumber(c:sub(9, 10))].rays
+		local t = string.char
+		local length = 52 + (#outlist * #outlist[1] * 3)
+		local bmp = Bitmap.empty_bitmap(RES_X, RES_Y)
+		for y, row in next, outlist do
+			for x, pixel in next, row do
+				bmp:set_pixel(x, RES_Y-y, pixel.R * 255, pixel.G * 255, pixel.B * 255)
+				if x % 32 == 0 then task.wait() end
+			end
+		end
+		print(http:PostAsync(c:sub(12, -1), bmp:tostring()))
+	elseif c:sub(1, 5) == '%conf' then
+		local command = c:split(' ')
+		if command[2] == 'RES_X' then
+			RES_X = tonumber(command[3])
+		elseif command[2] == 'RES_Y' then
+			RES_Y = tonumber(command[3])
+		elseif command[2] == 'DIMUL' then
+			DIMUL = tonumber(command[3])
+		elseif command[2] == 'RENDER_MODE' then
+			RENDER_MODE = command[3]
+		elseif command[2] == 'SHADOWS' then
+			SHADOWS = command[3] == 'true'
+		elseif command[2] == 'MULTI_LIGHT' then
+			MULTI_LIGHT = command[3] == 'true'
+		end
 	end
 end)

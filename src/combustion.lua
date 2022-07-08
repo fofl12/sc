@@ -4,8 +4,9 @@ rem.Parent = owner.PlayerGui
 rem.OnServerEvent:Connect(function(_, pos)
   local x = Instance.new('Explosion')
   x.Position = pos
-  x.BlastRadius = 100
-  x.BlastPressure = 100000000000
+  x.BlastRadius = 1000
+  x.ExplosionType = 'Craters'
+  x.BlastPressure = 10000000000000000
   Instance.new('Explosion', workspace).Position = pos
 end)
 

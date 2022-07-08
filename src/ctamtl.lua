@@ -5,9 +5,10 @@ display.Position = owner.Character.Head.Position
 display.Anchored = true
 display.CanCollide = false
 display.Parent = script
+display.Parent = script
 
-local linker = owner.Backpack.ctools.linkerPort
-assert(linker, 'lack of Linker Port!?!?!?')
+--local linker = owner.Backpack.ctools.linkerPort
+--assert(linker, 'lack of Linker Port!?!?!?')
 
 local gui = Instance.new('SurfaceGui', display)
 
@@ -57,5 +58,3 @@ linker.Event:Connect(function(name, meta)
 		log('Unknown command ' .. name)
 	end
 end)
-
-display.Parent = script

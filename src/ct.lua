@@ -38,8 +38,7 @@ local function dirLayout(callback, root, _recursed)
 end
 
 -- local capture = false
-local buildFolder = Instance.new('Folder', workspace)
-buildFolder:SetAttribute('isCtRoot', true)
+local buildFolder = Instance.new('Folder', script)
 buildFolder.Name = adjectives[math.random(1,#adjectives)] .. nouns[math.random(1,#nouns)]
 local rootFolder = buildFolder
 local coreFolder = Instance.new('Folder', script)
@@ -101,7 +100,10 @@ do
 - dir: show root directory structure
 - hideDir: hide screen from dir
 - import: import external selected object to building dir
+- export: export contents of the root dir to a folder that won't be deleted when the ct script is deleted. The folder where contents will be exported to will have the same name as the root dir
 - cd [name]: change building dir, use .. to go up
+- snap [number]: set snap to [number] studs
+- rotsnap [number]: set rotation snap to [number] degrees
 ]]
 		script.Parent.Equipped:Connect(function()
 			gui.Parent = owner.PlayerGui
@@ -163,14 +165,6 @@ port.OnServerEvent:Connect(function(player, mode, ...)
 		-- end
 		-- return
 	-- end
-	print(rootFolder.Parent)
-	if rootFolder.Parent ~= workspace then
-		print('Corrupted root folder! Rebuilding...')
-		rootFolder = Instance.new('Folder', worskpace)
-		rootFolder.Name = adjectives[math.random(1,#adjectives)] .. nouns[math.random(1,#nouns)]
-		rootFolder:SetAttribute('isCtRoot', true)
-		buildFolder = rootFolder
-	end
 	if mode == 'move' then
 		local part = ({...})[1]
 		local new = ({...})[2]
@@ -195,6 +189,9 @@ port.OnServerEvent:Connect(function(player, mode, ...)
 		local part = ({...})[1]
 		local new = ({...})[2]
 		local val = ({...})[3]
+		if type(part) == 'string' then
+			part = buildFolder:FindFirstChild(part)
+		end
 		part[val] = new
 	elseif mode == 'delete' then
 		local part = ({...})[1]
@@ -224,6 +221,11 @@ port.OnServerEvent:Connect(function(player, mode, ...)
 		end
 	elseif mode == 'import' then
 		({...})[1].Parent = buildFolder
+	elseif mode == 'export' then
+		local export = buildFolder:Clone()
+		export:SetAttribute('isCtRoot', true)
+		buildFolder:ClearAllChildren()
+		export.Parent = workspace
 	elseif mode == 'cd' then
 		if ({...})[1] == '..' and buildFolder ~= rootFolder then
 			buildFolder = buildFolder.Parent
@@ -233,6 +235,9 @@ port.OnServerEvent:Connect(function(player, mode, ...)
 	end
 end)
 NLS([[
+	local snap = 1
+	local rotsnap = math.rad(45)
+	
 	local port = script.Parent
 	local tool = port.Parent
 	local gui = Instance.new('SurfaceGui', script)
@@ -338,14 +343,16 @@ NLS([[
 			elseif command[1] == 'mat' then
 				port:FireServer('prop', selection, command[2], 'Material')
 			elseif command[1] == 'bool' then
-				port:FireServer('prop', selection, command[3] == 'true' and true or false, command[2])
+				port:FireServer('prop', command[4] or selection, command[3] == 'true' and true or false, command[2])
 			elseif command[1] == 'num' then
 				local num, _ = command[3]:gsub("/", ".")
-				port:FireServer('prop', selection, tonumber(num), command[2])
+				port:FireServer('prop', command[4] or selection, tonumber(num), command[2])
 			elseif command[1] == 'str' then
-				port:FireServer('prop', selection, command[3], command[2])
+				port:FireServer('prop', command[4] or selection, command[3], command[2])
 			elseif command[1] == 'new' then
-				port:FireServer('create', mouse.Hit.p, command[2] or 'Part')
+				local rp = mouse.Hit.p
+				local pos = Vector3.new(math.round(rp.X / snap) * snap, math.round(rp.Y / snap) * snap, math.round(rp.Z / snap) * snap)
+				port:FireServer('create', pos, command[2] or 'Part')
 			elseif command[1] == 'tnew' then
 				port:FireServer('create', false, command[2])
 			elseif command[1] == 'dir' then
@@ -354,8 +361,16 @@ NLS([[
 				port:FireServer('dir', false)
 			elseif command[1] == 'import' then
 				port:FireServer('import', selection)
+			elseif command[1] == 'export' then
+				port:FireServer('export')
 			elseif command[1] == 'cd' then
 				port:FireServer('cd', command[2])
+			elseif command[1] == 'snap' then
+				local num, _ = command[2]:gsub("/", ".")
+				snap = num
+			elseif command[1] == 'rotsnap' then
+				local num, _ = command[2]:gsub("/", ".")
+				rotsnap = math.rad(num)
 			else
 				output('? What')
 			end
@@ -401,7 +416,9 @@ NLS([[
 	end)
 	mouse.Move:Connect(function()
 		if dragging and selection then
-			selection.CFrame = CFrame.new(mouse.Hit.Position) + Vector3.new(selection.Size.X/2, selection.Size.Y/2, selection.Size.Z/2)
+			local rhp = mouse.Hit.Position
+			local hitpos = CFrame.new(math.round(rhp.X / snap) * snap, math.round(rhp.Y / snap) * snap, math.round(rhp.Z / snap) * snap)
+			selection.CFrame = hitpos + Vector3.new(selection.Size.X/2, selection.Size.Y/2, selection.Size.Z/2)
 		end
 	end)
 	mouse.Button1Up:Connect(function()
@@ -414,19 +431,23 @@ NLS([[
 	end)
 
 	move.MouseButton1Down:Connect(function()
-		if mode == 'g' then
-			origin = selection.CFrame
-		elseif mode ==  's' then
-			origin = selection.Size
-		end
+		originPos = selection.CFrame
+		originSize = selection.Size
 	end)
 	move.MouseDrag:Connect(function(face, distance)
 		if mode == 'g' then
-			local pos = Vector3.FromNormalId(face) * distance
-			selection.CFrame = origin * CFrame.new(pos.X, pos.Y, pos.Z)
+			local pos = Vector3.FromNormalId(face) * (math.round(distance / snap) * snap)
+			selection.CFrame = originPos * CFrame.new(pos.X, pos.Y, pos.Z)
 		elseif mode == 's' then
-			local pos = Vector3.FromNormalId(face) * distance
-			selection.Size = origin + pos
+			local v = Vector3.FromNormalId(face)
+			local pos = v * (math.round(distance / snap) * snap)
+			if v.X + v.Y + v.Z < 0 then
+				selection.Size = originSize - pos
+				selection.CFrame = originPos + (pos * 0.5)
+			else
+				selection.Size = originSize + pos
+				selection.CFrame = originPos + (pos * 0.5)
+			end
 		end
 	end)
 	move.MouseButton1Up:Connect(function()
@@ -437,7 +458,7 @@ NLS([[
 		origin = selection.CFrame
 	end)
 	rotate.MouseDrag:Connect(function(axis, rel, delta)
-		local axis = Vector3.FromAxis(axis) * rel
+		local axis = Vector3.FromAxis(axis) * (math.round(rel / rotsnap) * rotsnap)
 		selection.CFrame = origin * CFrame.Angles(axis.X, axis.Y, axis.Z)
 	end)
 	rotate.MouseButton1Up:Connect(function()
