@@ -1,12 +1,164 @@
-local billboard = Instance.new('BillboardGui', owner.Character.Head)
-billboard.StudsOffset = Vector3.new(0, 3, 0)
-billboard.Size = UDim2.fromScale(2, 1)
+local mss = game:GetService('MessagingService')
+local http = game:GetService('HttpService')
+local players = game:GetService('Players')
+function getChatColor(user)
+    local CHAT_COLORS =
+    {
+        Color3.new(253/255, 41/255, 67/255), -- BrickColor.new("Bright red").Color,
+        Color3.new(1/255, 162/255, 255/255), -- BrickColor.new("Bright blue").Color,
+        Color3.new(2/255, 184/255, 87/255), -- BrickColor.new("Earth green").Color,
+        BrickColor.new("Bright violet").Color,
+        BrickColor.new("Bright orange").Color,
+        BrickColor.new("Bright yellow").Color,
+        BrickColor.new("Light reddish violet").Color,
+        BrickColor.new("Brick yellow").Color,
+    }
 
-local text = Instance.new('TextBox', billboard)
-text.Text = 'Test'
-text.TextWrap = true
-text.TextScaled = true
-text.Size = UDim2.fromScale(1, 1)
+        local function GetNameValue(pName)
+            local value = 0
+            for index = 1, #pName do
+                local cValue = string.byte(string.sub(pName, index, index))
+                local reverseIndex = #pName - index + 1
+                if #pName%2 == 1 then
+                    reverseIndex = reverseIndex - 1
+                end
+                if reverseIndex%4 >= 2 then
+                    cValue = -cValue
+                end
+                value = value + cValue
+            end
+            return value
+        end
+
+    return '#' .. CHAT_COLORS[(GetNameValue(user) % #CHAT_COLORS) + 1]:ToHex()
+end
+local function generateText(message)
+	local authorName = players:GetNameFromUserIdAsync(message.Author)
+	local out = ''
+	out ..= '<font color="#' .. getChatColor(authorName) .. '">[' .. authorName .. '] '
+	if message.Nickname then
+		out ..= '[' .. message.Nickname .. '] '
+	end
+	out ..= '</font>'
+	if message.Type == 'text' then
+		out ..= message.Content
+	else
+		out ..= message.Comment or '[No comment provided]'
+	end
+	return out
+end
+
+local board = Instance.new('Part')
+board.Position = owner.Character.Head.Position + Vector3.new(0, 2)
+board.Size = Vector3.new(16, 9, 0)
+board.Color = Color3.new()
+board.Anchored = true
+board.Transparency = 0.6
+board.Material = 'Glass'
+board.Parent = script
+
+local gui = Instance.new('SurfaceGui', board)
+
+local chat = Instance.new('Frame', gui)
+chat.Size = UDim2.fromScale(0.8, 1)
+chat.BackgroundTransparency = 1
+local chatListLayout = Instance.new('UIListLayout', chat)
+chatListLayout.FillDirection = 'Vertical'
+chatListLayout.SortOrder = 'Name'
+chatListLayout.HorizontalAlignment = 'Left'
+chatListLayout.VerticalAlignment = 'Bottom'
+
+local chatText = Instance.new('TextBox')
+chatText.TextXAlignment = 'Left'
+chatText.RichText = true
+chatText.BackgroundTransparency = 1
+chatText.TextColor3 = Color3.new(1, 1, 1)
+chatText.Size = UDim2.fromScale(1, 0.01)
+chatText.AutomaticSize = 'Y'
+chatText.TextYAlignment = 'Top'
+chatText.TextWrapped = true
+chatText.TextSize = 16
+
+local function sendMessage(text, author, message)
+	local vis = chatText:Clone()
+	if message then
+		vis.Text = generateText(message)
+	else
+		vis.Text = ('[%s] %s'):format(author, text)
+	end
+	vis.Name = os.time()
+	vis.Parent = chat
+
+	local labels = chat:GetChildren()
+	if #labels > 40 then
+		local oldest
+		for _, label in next, labels do
+			if not label:IsA('UIListLayout') then
+				if not oldest or tonumber(oldest.Name) > tonumber(label.Name) then
+					oldest = label
+				end
+			end
+		end
+		if oldest then
+			oldest:Destroy()
+		end
+	end
+
+	return vis
+end
+sendMessage('chat.lua (comradio2 revision 2.1)', 'SYSTEM')
+sendMessage('Please connect to a channel to initiate communications', 'SYSTEM')
+
+local roster = {}
+local channel = nil
+local connection = nil
+local nickname = nil
+local function connect()
+	if connection then
+		connection:Disconnect()
+	end
+	connection = mss:SubscribeAsync('comradio:' .. channel, function(recv)
+		local data = http:JSONDecode(recv.Data)
+		local authorName = players:GetNameFromUserIdAsync(data.Author)
+		if data.Type == 'text' then
+			sendMessage(data.Content, authorName, data)
+		elseif data.Type == 'welcome' then
+			sendMessage(authorName .. ' has joined', 'WELCOME')
+		elseif data.Type == 'status' then
+			sendMessage(authorName .. ' has changed their status to ' .. data.Comment, 'STATUS')
+		elseif data.Type == 'rosterRequest' then
+			sendMessage(authorName .. ' has requested a roster', 'ROSTER')
+			mss:PublishAsync('comradio:' .. channel, http:JSONEncode({
+				Type = 'rosterResponse',
+				Content = '',
+				Author = owner.UserId
+			}))
+		elseif data.Type == 'rosterResponse' then
+			if not table.find(roster, authorName) then
+				table.insert(roster, authorName)
+			end
+		elseif data.Type == 'image' then
+			local message = sendMessage(data.Comment, authorName, data)
+			local image = Instance.new('ImageLabel', message)
+			image.Image = data.Content
+			image.Size = UDim2.fromOffset(150, 150)
+			image.Position = UDim2.fromOffset(5, 25)
+		elseif data.Type == 'sound' then
+			local message = sendMessage(data.Comment, authorName, data)
+			local sound = Instance.new('TextBox', message)
+			sound.Text = 'Sound: ' .. data.Content
+			sound.TextScaled = true
+			sound.Size = UDim2.fromOffset(150, 150)
+			sound.Position = UDim2.fromOffset(5, 25)
+		end
+	end)
+	sendMessage('Connected to channel', 'SYSTEM')
+	mss:PublishAsync('comradio:' .. channel, http:JSONEncode({
+		Type = 'welcome',
+		Content = '',
+		Author = owner.UserId
+	}))
+end
 
 local remote = Instance.new('RemoteEvent', owner.PlayerGui)
 NLS([[
@@ -16,40 +168,84 @@ remote.Parent = script
 
 local ui = Instance.new('ScreenGui')
 local frame = Instance.new('Frame')
-frame.Size = UDim2.fromOffset(400, 300)
+frame.Size = UDim2.fromOffset(400, 20)
 frame.AnchorPoint = Vector2.one
 frame.Position = UDim2.fromScale(1, 1)
+frame.Parent = ui
+
+local mode = Instance.new('TextBox')
+mode.Text = ''
+mode.PlaceholderText = 'Mode'
+mode.Size = UDim2.fromScale(0.2, 1)
+mode.Parent = frame
+
+local message = Instance.new('TextBox')
+message.Text = ''
+message.PlaceholderText = 'Message'
+message.Size = UDim2.fromScale(0.7, 1)
+message.Position = UDim2.fromScale(0.2, 0)
+message.Parent = frame
 
 local button = Instance.new('TextButton')
-button.Text = 'Push'
-button.Size = UDim2.fromOffset(64, 16)
+button.Text = 'Send'
+button.Size = UDim2.fromScale(0.1, 1)
+button.Position = UDim2.fromScale(0.9, 0)
 button.Parent = frame
 
-local scroller = Instance.new('ScrollingFrame')
-scroller.Position = UDim2.fromOffset(0, 16)
-scroller.Size = UDim2.fromOffset(400, 284)
-scroller.Parent = frame
-
-local box = Instance.new('TextBox')
-box.Font = 'Code'
-box.TextXAlignment = 'Left'
-box.TextYAlignment = 'Top'
-box.TextWrap = true
-box.TextSize = 10
-box.MultiLine = true
-box.Size = UDim2.fromScale(1, 1)
-box.ClearTextOnFocus = false
-box.Parent = scroller
-
 button.MouseButton1Click:Connect(function()
-	remote:FireServer(box.Text)
+	remote:FireServer(mode.Text, message.Text)
 end)
 
-frame.Parent = ui
 ui.Parent = script
 ]], remote)
-remote.OnServerEvent:Connect(function(plr, mode)
-	if plr == owner then
-		text.Text = mode
+remote.OnServerEvent:Connect(function(plr, mode, dat)
+	if mode == 'text' then
+		if channel then
+			local message = http:JSONEncode({
+				Type = 'text',
+				Content = dat,
+				Author = owner.UserId,
+				Nickname = nickname
+			})
+			mss:PublishAsync('comradio:' .. channel, message)
+		else
+			sendMessage('Cannot send messages while not connected to any channel!', 'SYSTEM')
+		end
+	elseif mode == 'image' then
+		if channel then
+			local message = http:JSONEncode({
+				Type = 'image',
+				Content = dat,
+				Author = owner.UserId,
+				Nickname = nickname
+			})
+			mss:PublishAsync('comradio:' .. channel, message)
+		else
+			sendMessage('Cannot send messages while not connected to any channel!', 'SYSTEM')
+		end
+	elseif mode == 'channel' then
+		channel = dat
+		if channel == '<GENERAL>' then
+			channel = ''
+		end
+		connect()
+	elseif mode == 'nickname' then
+		nickname = dat
+		sendMessage('Set nickname to ' .. nickname, 'ROSTER')
+	elseif mode == 'roster' then
+		roster = {}
+		sendMessage('Requesting roster...', 'ROSTER')
+		mss:PublishAsync('comradio:' .. channel, http:JSONEncode({
+			Type = 'rosterRequest',
+			Content = '',
+			Author = owner.UserId
+		}))
+		task.wait(5)
+		sendMessage('------ Roster ------', 'ROSTER')
+		task.wait()
+		for _, name in next, roster do
+			sendMessage(name, 'ROSTER')
+		end
+		sendMessage('-----------------------', 'ROSTER')
 	end
 end)
