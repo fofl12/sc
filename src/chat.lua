@@ -32,18 +32,31 @@ function getChatColor(user)
 
     return '#' .. CHAT_COLORS[(GetNameValue(user) % #CHAT_COLORS) + 1]:ToHex()
 end
+local function filter(text)
+	local o = text:gsub(string.char(0), '[NullChar]')
+	o = o:gsub('&', '&amp;')
+	o = o:gsub('<', '&lt;')
+	o = o:gsub('>', '&rt;')
+	o = o:gsub('"', '&quot;')
+	o = o:gsub("'", '&apos;')
+	return o
+end
 local function generateText(message)
 	local authorName = players:GetNameFromUserIdAsync(message.Author)
 	local out = ''
-	out ..= '<font color="#' .. getChatColor(authorName) .. '">[' .. authorName .. '] '
+	out ..= '<font color="' .. getChatColor(authorName) .. '">[' .. authorName .. '] '
 	if message.Nickname then
-		out ..= '[' .. message.Nickname .. '] '
+		out ..= '[' .. filter(message.Nickname) .. '] '
 	end
 	out ..= '</font>'
 	if message.Type == 'text' then
-		out ..= message.Content
+		out ..= filter(message.Content)
 	else
-		out ..= message.Comment or '[No comment provided]'
+		out ..= message.Comment and filter(message.Comment) or '[No comment provided]'
+		if message.Type == 'ping' then
+			local pingName = players:GetNameFromUserIdAsync(tonumber(message.Content))
+			out ..= ' [Pinging ' .. pingName .. ']'
+		end
 	end
 	return out
 end
@@ -108,6 +121,7 @@ local function sendMessage(text, author, message)
 end
 sendMessage('chat.lua (comradio2 revision 2.1)', 'SYSTEM')
 sendMessage('Please connect to a channel to initiate communications', 'SYSTEM')
+sendMessage('Documentation for comradio2 may be found in the repository fofl12/comradio2 on GitHub', 'SYSTEM')
 
 local roster = {}
 local channel = nil
@@ -150,6 +164,20 @@ local function connect()
 			sound.TextScaled = true
 			sound.Size = UDim2.fromOffset(150, 150)
 			sound.Position = UDim2.fromOffset(5, 25)
+		elseif data.Type == 'ping' then
+			sendMessage(data.Comment, authorName, data)
+			if data.Content == tostring(owner.UserId) then
+				for _ = 1, 3 do
+					board.Color = Color3.new(1, 1, 0)
+					board.Material = 'Plastic'
+					board.Transparency = 0
+					task.wait(0.2)
+					board.Color = Color3.new(0, 0, 0)
+					board.Material = 'Glass'
+					board.Transparency = 0.6
+					task.wait(0.2)
+				end
+			end
 		end
 	end)
 	sendMessage('Connected to channel', 'SYSTEM')
@@ -199,6 +227,7 @@ end)
 ui.Parent = script
 ]], remote)
 remote.OnServerEvent:Connect(function(plr, mode, dat)
+	local command = mode:split(';')
 	if mode == 'text' then
 		if channel then
 			local message = http:JSONEncode({
@@ -211,11 +240,12 @@ remote.OnServerEvent:Connect(function(plr, mode, dat)
 		else
 			sendMessage('Cannot send messages while not connected to any channel!', 'SYSTEM')
 		end
-	elseif mode == 'image' then
+	elseif command[1] == 'image' then
 		if channel then
 			local message = http:JSONEncode({
 				Type = 'image',
 				Content = dat,
+				Comment = command[2],
 				Author = owner.UserId,
 				Nickname = nickname
 			})
@@ -232,6 +262,20 @@ remote.OnServerEvent:Connect(function(plr, mode, dat)
 	elseif mode == 'nickname' then
 		nickname = dat
 		sendMessage('Set nickname to ' .. nickname, 'ROSTER')
+	elseif command[1] == 'ping' then
+		if channel then
+			local uid = players:GetUserIdFromNameAsync(dat)
+			local message = http:JSONEncode({
+				Type = 'ping',
+				Content = tostring(uid),
+				Comment = command[2],
+				Author = owner.UserId,
+				Nickname = nickname
+			})
+			mss:PublishAsync('comradio:' .. channel, message)
+		else
+			sendMessage('Cannot send messages while not connected to any channel!', 'SYSTEM')
+		end
 	elseif mode == 'roster' then
 		roster = {}
 		sendMessage('Requesting roster...', 'ROSTER')
@@ -240,7 +284,7 @@ remote.OnServerEvent:Connect(function(plr, mode, dat)
 			Content = '',
 			Author = owner.UserId
 		}))
-		task.wait(5)
+		task.wait(1)
 		sendMessage('------ Roster ------', 'ROSTER')
 		task.wait()
 		for _, name in next, roster do

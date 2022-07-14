@@ -122,7 +122,7 @@ end)
 
 local dropperBuy = Instance.new('Part')
 dropperBuy.Anchored = true
-dropperBuy.Size = Vector3.one()
+dropperBuy.Size = Vector3.one
 dropperBuy.BrickColor = BrickColor.Red()
 dropperBuy.Position = owner.Character.Head.Position + Vector3.new(0, 0, 10)
 local dropperBuyCliker = Instance.new('ClickDetector', dropperBuy)
