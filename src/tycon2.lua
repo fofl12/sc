@@ -2,7 +2,7 @@ local offset = owner.Character.Head.Position
 local mps = game:GetService('MarketplaceService')
 local power = 0
 local powerstage = 1
-local generation = 0
+local generation = 30
 local robucgks = 100
 local filterPrice = 100
 local powerPrice = 120
@@ -78,7 +78,9 @@ for i = 1, math.floor(mconveyer.Size.X / 10) do
 						block.Color = Color3.new(0.2, 0.2, 0.2)
 						block.Position = Vector3.new(conveyer.Position.X, 4, y)
 						block.Parent = dropper
+						block.Name = 'Food'
 						block:SetAttribute('worth', 2)
+						block:SetAttribute('isFood', true)
 						debris:AddItem(block, i * 30)
 					end
 				end
@@ -147,7 +149,7 @@ end)
 task.spawn(function()
 	while true do
 		task.wait(1)
-		hum.DisplayName = ('ROBUCGKS: %i\nPowerGen GREEN pric: %i     Filter BLUE pric: %i\nPower (consumption/generation): %i/%i\nConveyer speed boost ORANGE: %s'):format(robucgks, powerPrice, filterPrice, power, generation * powerstage, tostring(conveyerSpeed > 7))
+		hum.DisplayName = ('ROBUCGKS: %i\nPowerGen GREEN pric: %i     Filter BLUE pric: %i\nPower (consumption/generation): %i/%i\nConveyer speed boost YELLOW: %s  Power generation boost RED: %s'):format(robucgks, powerPrice, filterPrice, power, generation * powerstage, tostring(conveyerSpeed > 7), tostring(generation > 31))
 	end
 end)
 
@@ -209,7 +211,7 @@ local conveyerSpeedBuy = Instance.new('Part')
 conveyerSpeedBuy.Anchored = true
 conveyerSpeedBuy.Size = Vector3.one
 conveyerSpeedBuy.BrickColor = BrickColor.Yellow()
-conveyerSpeedBuy.Position = saler.Position + Vector3.new(0, 0, 6)
+conveyerSpeedBuy.Position = saler.Position + Vector3.new(1, 0, 6)
 local conveyerSpeedClicker = Instance.new('ClickDetector', conveyerSpeedBuy)
 conveyerSpeedClicker.MouseClick:Connect(function(p)
 	if mps:UserOwnsGamePassAsync(p.UserId, 60776802) then
@@ -221,108 +223,15 @@ conveyerSpeedClicker.MouseClick:Connect(function(p)
 end)
 conveyerSpeedBuy.Parent = script
 
-local tutorial = Instance.new('Part', script)
-tutorial.Anchored = true
-tutorial.Size = Vector3.new(12, 8, 1)
-tutorial.Position = saler.Position + Vector3.new(-5, 5, -6)
-do
-	local gui = Instance.new('SurfaceGui', tutorial)
-	gui.Face = 'Back'
-	local frame = Instance.new('ScrollingFrame', gui)
-	frame.Size = UDim2.fromScale(1, 1)
-	frame.CanvasSize = UDim2.fromScale(1, 6)
-	local uilist = Instance.new('UIListLayout', frame)
-end
-
--- Multiplayer mode
-local ballgrup = Instance.new('Model', script)
-local ball = Instance.new('Part')
-ball.BrickColor = BrickColor.Blue()
-ball.Shape = 'Ball'
-ball.Name = 'Head'
-ball.Size = Vector3.one * 3
-ball.Material = 'Neon'
-ball.Position = offset + Vector3.new(0, 2, 20)
-ball.Anchored = true
-ball.Touched:Connect(game.Destroy)
-ball.Parent = ballgrup
-
-local meltdownalarm = Instance.new('Sound', ball)
-meltdownalarm.SoundId = 'rbxassetid://6456981311'
-meltdownalarm.Volume = 5
-meltdownalarm.Looped = true
-local autopilotalarm = Instance.new('Sound', ball)
-autopilotalarm.SoundId = 'rbxassetid://9113084761'
-autopilotalarm.Volume = 1
-autopilotalarm.Looped = true
-
-local info = Instance.new('Humanoid', ballgrup)
-
-local coolant = false
-local heatant = false
-local autopilot = true
-local better = false
-local temp = 0
-
-local coolantButton = Instance.new('Part')
-coolantButton.Size = Vector3.one
-coolantButton.Position = offset + Vector3.new(-1, 0, 18)
-coolantButton.BrickColor = BrickColor.Blue()
-coolantButton.Anchored = true
-local coolantClicker = Instance.new('ClickDetector', coolantButton)
-local debonk = false
-coolantClicker.MouseClick:Connect(function()
-	if not debonk then
-		debonk = true
-		coolant = not coolant
-		task.wait(1)
-		debonk = false
-	end
-end)
-coolantButton.Parent = script
-
-local heatantButton = coolantButton:Clone()
-heatantButton.Position = offset + Vector3.new(1, 0, 18)
-heatantButton.BrickColor = BrickColor.Red()
-heatantButton.ClickDetector.MouseClick:Connect(function()
-	if not debonk then
-		debonk = true
-		heatant = not heatant
-		task.wait(1)
-		debonk = false
-	end
-end)
-heatantButton.Parent = script
-
-local autopilotButton = coolantButton:Clone()
-autopilotButton.Position = offset + Vector3.new(0, 0, 18)
-autopilotButton.BrickColor = BrickColor.White()
-autopilotButton.ClickDetector.MouseClick:Connect(function()
-	if not debonk then
-		debonk = true
-		temp = 0
-		meltdownalarm:Stop()
-		autopilot = not autopilot
-		if autopilot then
-			autopilotalarm:Stop()
-		else
-			autopilotalarm:Play()
-		end
-		task.wait(1)
-		debonk = false
-	end
-end)
-autopilotButton.Parent = script
-
-local betterButton = coolantButton:Clone()
-betterButton.Position = offset + Vector3.new(2, 0, 18)
-betterButton.BrickColor = BrickColor.Yellow()
+local betterButton = conveyerSpeedBuy:Clone()
+betterButton.Position = saler.Position + Vector3.new(0, 0, 6)
+betterButton.BrickColor = BrickColor.Red()
 betterButton.ClickDetector.MouseClick:Connect(function(p)
 	if not debonk then
 		debonk = true
-		if better or mps:UserOwnsGamePassAsync(p.UserId, 60736939) then
-			better = not better
-		else
+		if mps:UserOwnsGamePassAsync(p.UserId, 60736939) then
+			generation = 60
+		elseif generation < 60 then
 			mps:PromptGamePassPurchase(p, 60736939)
 		end
 		task.wait(1)
@@ -330,67 +239,3 @@ betterButton.ClickDetector.MouseClick:Connect(function(p)
 	end
 end)
 betterButton.Parent = script
-
-local powerRequest = 500
-local totalProfit = 0
-
-while true do
-	task.wait(1)
-	if autopilot then
-		if better then
-			if temp < 65 then
-				heatant = true
-				coolant = false
-			elseif temp > 80 then
-				coolant = true
-				heatant = false
-			elseif temp < 65 then
-				heatant = false
-			end
-		else
-			if temp < 40 then
-				heatant = true
-				coolant = false
-			elseif temp > 60 then
-				coolant = true
-				heatant = false
-			elseif temp < 60 then
-				heatant = false
-			end
-		end
-	end
-
-	if temp < 0 then
-		temp = 0
-	end
-	temp += (heatant and 5 or 0) + (coolant and -5 or 0)
-	generation = temp >= 30 and temp - 30 or 0
-	local state = ''
-	if temp > 180 then
-		state = '[ MELTDOWN ]'
-		temp *= 2
-		ball.Size *= 1.5
-		local explosion = Instance.new('Explosion')
-		explosion.BlastRadius = ball.Size.X * 1.5
-		explosion.Position = ball.Position
-		explosion.Parent = ball
-	elseif temp > 90 then
-		if not meltdownalarm.Playing then
-			meltdownalarm:Play()
-		end
-		state = '[ CRITICAL ]'
-		ball.BrickColor = BrickColor.Red()
-		temp *= 1.05
-	elseif temp > 60 then
-		state = '[ DANGER ]'
-		temp *= 1.03
-	elseif temp > 30 then
-		state = '[ GENERATING ]'
-		temp *= 1.02
-		ball.BrickColor = BrickColor.Yellow()
-	else
-		state = '[ NOT GENERATING ]'
-		ball.BrickColor = BrickColor.Blue()
-	end
-	info.DisplayName = ('Temperature: %i  Status: %s\nCoolant:%s  Heatant:%s\nAutopilot: %s (better mode: %s)'):format(temp, state, tostring(coolant), tostring(heatant), tostring(autopilot), tostring(better))
-end

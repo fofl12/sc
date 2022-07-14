@@ -22,7 +22,7 @@ NLS([[
 		local mouse = owner:GetMouse();
 
 		mouse.Button1Down:Connect(function()
-			rem:FireServer('down', mouse.UnitRay.Direction, mouse.UnitRay.Origin);
+			rem:FireServer('down', mouse.Target);
 		end)
 		mouse.Button1Up:Connect(function()
 			rem:FireServer('up');
@@ -30,7 +30,7 @@ NLS([[
 	]], remote)
 local charging = false
 local charge = 0
-remote.OnServerEvent:Connect(function(plr, mode, direction, origin)
+remote.OnServerEvent:Connect(function(plr, mode, target)
 	if plr ~= owner then
 		return nil
 	end
@@ -38,20 +38,23 @@ remote.OnServerEvent:Connect(function(plr, mode, direction, origin)
 		local _fallthrough = false
 		if mode == "down" then
 			charging = true
+			local charge = 0
 			while charging do
 				wait(1 / 10)
 				charge += 1
 				local ex = Instance.new("Explosion")
 				ex.DestroyJointRadiusPercent = 0
+				ex.BlastPressure = 0
 				ex.ExplosionType = Enum.ExplosionType.NoCraters
 				ex.Position = handle.Position
 				ex.Parent = handle.Parent
 				debris:AddItem(ex, 1)
+				charge += 1
 			end
 			local ex = Instance.new("Explosion")
-			ex.Position = handle.Position
-			ex.BlastPressure = charging * 1000
-			ex.Parent = handle.Parent
+			ex.Position = target.Position
+			ex.BlastPressure = charge * 1000
+			ex.Parent = target
 			debris:AddItem(ex, 1)
 			_fallthrough = true
 		end
