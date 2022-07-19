@@ -1,4 +1,4 @@
-local CHANNEL = 5
+local CHANNEL = 6
 _G['channel' .. CHANNEL] = Instance.new('BindableEvent')
 
 local function music(Play, W, ping, bass, snap, ping2, speed)

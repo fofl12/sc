@@ -1,6 +1,14 @@
 local tool = Instance.new('Tool')
 tool.Name = 'balon'
 
+local remote = Instance.new('RemoteEvent', tool)
+NLS([[
+local m = owner:GetMouse()
+script.Parent.Parent.Activated:Connect(function()
+	script.Parent:FireServer(m.Target)
+end)
+]], remote)
+
 local handle = Instance.new('Part')
 handle.Size = Vector3.one
 handle.Name = 'Handle'
@@ -28,3 +36,10 @@ rope.Visible = true
 rope.Parent = tool
 
 tool.Parent = owner.Backpack
+
+remote.OnServerEvent:Connect(function(_, target)
+	a0.Parent = target
+	a0.WorldPosition = target.Position
+	balloon.Parent = script
+	rope.Parent = balloon
+end)

@@ -1,6 +1,7 @@
 local mss = game:GetService('MessagingService')
 local http = game:GetService('HttpService')
 local players = game:GetService('Players')
+local blocked = {}
 function getChatColor(user)
     local CHAT_COLORS =
     {
@@ -63,7 +64,7 @@ end
 
 local board = Instance.new('Part')
 board.Position = owner.Character.Head.Position + Vector3.new(0, 2)
-board.Size = Vector3.new(16, 9, 0)
+board.Size = Vector3.new(12, 12, 0)
 board.Color = Color3.new()
 board.Anchored = true
 board.Transparency = 0.6
@@ -71,6 +72,7 @@ board.Material = 'Glass'
 board.Parent = script
 
 local gui = Instance.new('SurfaceGui', board)
+gui.SizingMode = 'PixelsPerStud'
 
 local chat = Instance.new('Frame', gui)
 chat.Size = UDim2.fromScale(0.8, 1)
@@ -121,7 +123,7 @@ local function sendMessage(text, author, message)
 end
 sendMessage('chat.lua (comradio2 revision 2.1)', 'SYSTEM')
 sendMessage('Please connect to a channel to initiate communications', 'SYSTEM')
-sendMessage('Documentation for comradio2 may be found in the repository fofl12/comradio2 on GitHub', 'SYSTEM')
+sendMessage('Documentation for comradio2 may be found in github.com/fofl12/comradio', 'SYSTEM')
 
 local roster = {}
 local channel = nil

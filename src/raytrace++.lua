@@ -4,6 +4,7 @@ local RES_Y = 120
 local PIXEL_SIZE = Vector3.one * 0.1 -- requires RENDER_MODE to be 'Part'
 local DIMUL = 3
 local LENIENT = false
+local DRONE_SHOT = false
 local ALBUM = true -- requires RENDER_MODE to be 'Text' to be able to visualize renders
 local RENDER_MODE = 'Text'
 local MULTI_LIGHT = false -- enable multiple light sources
@@ -47,15 +48,6 @@ do
 	handle.Parent = tool
 	tool.Parent = owner.Backpack
 end
-local remote = Instance.new('RemoteEvent')
-remote.Name = 'RemoteLinker'
-remote.Parent = tool
-NLS([[
-local remote = script.Parent:WaitForChild('RemoteLinker')
-script.Parent.Activated:Connect(function()
-	remote:FireServer()
-end)
-]], tool)
 statelabel.Text = 'Ready'
 
 local matmap = {
@@ -74,8 +66,8 @@ local function cast(origin, dir, layer)
 	if layer % 6 == 0 and not LENIENT then
 		task.wait()
 	end
-	if layer % 6000 == 0 then
-		warn('Passed 6000 layer milestone, the target is unreachable. Skipping...')
+	if layer % 100 == 0 then
+		warn('Passed 100 layer milestone, the target is unreachable. Skipping...')
 		ray = nil
 	end
 	if ray then
@@ -129,10 +121,17 @@ local function cast(origin, dir, layer)
 	return color, mat, dist
 end
 
-remote.OnServerEvent:Connect(function()
+tool.Activated:Connect(function()
 	statelabel.Text = 'Initializing'
 	sunormal = game.Lighting:GetSunDirection()
+
 	handle.Anchored = true
+	local oldcf = handle.CFrame
+	tool.Parent = workspace
+	if not DRONE_SHOT then
+		handle.CFrame = oldcf
+	end
+	task.wait(3)
 	
 	if MULTI_LIGHT then
 		statelabel.Text = 'Indexing lights'
@@ -167,6 +166,7 @@ remote.OnServerEvent:Connect(function()
 			end
 		end
 	end
+	tool.Parent = owner.Character
 	handle.Anchored = false
 	statelabel.Text = 'Rendering'
 	local offset = owner.Character.Head.Position
@@ -325,6 +325,8 @@ owner.Chatted:Connect(function(c)
 			SHADOWS = command[3] == 'true'
 		elseif command[2] == 'MULTI_LIGHT' then
 			MULTI_LIGHT = command[3] == 'true'
+		elseif command[2] == 'DRONE_SHOT' then
+			DRONE_SHOT = command[3] == 'true'
 		end
 	end
 end)

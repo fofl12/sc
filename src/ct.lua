@@ -80,7 +80,6 @@ do
 . set mode
 , start command
 ; end command
-/ (automatically replaced with . in commands)
 
 # Modes
 - g: Move
@@ -101,6 +100,7 @@ do
 - hideDir: hide screen from dir
 - import: import external selected object to building dir
 - export: export contents of the root dir to a folder that won't be deleted when the ct script is deleted. The folder where contents will be exported to will have the same name as the root dir
+- lua [script]: spawn a script in the current selection
 - cd [name]: change building dir, use .. to go up
 - snap [number]: set snap to [number] studs
 - rotsnap [number]: set rotation snap to [number] degrees
@@ -232,11 +232,16 @@ port.OnServerEvent:Connect(function(player, mode, ...)
 		else
 			buildFolder = buildFolder[({...})[1]]
 		end
+	elseif mode == 'lua' then
+		local script = ({...})[1]
+		local object = ({...})[2]
+		NS(script, object)
 	end
 end)
 NLS([[
 	local snap = 1
 	local rotsnap = math.rad(45)
+	local typing = false
 	
 	local port = script.Parent
 	local tool = port.Parent
@@ -279,7 +284,7 @@ NLS([[
 	local origin = nil
 
 	cas:BindAction('mode', function(_, state)
-		if state == Enum.UserInputState.Begin then
+		if state == Enum.UserInputState.Begin and not typing then
 			local vis = output('~ .')
 			local key
 			local connection
@@ -335,7 +340,9 @@ NLS([[
 					ready = true
 				end
 			end)
+			typing = true
 			repeat wait() until ready
+			typing = false
 
 			local command = key:split(' ')
 			if command[1] == 'color' then
@@ -371,6 +378,9 @@ NLS([[
 			elseif command[1] == 'rotsnap' then
 				local num, _ = command[2]:gsub("/", ".")
 				rotsnap = math.rad(num)
+			elseif command[1] == 'lua' then
+				local script = key:gsub(5, -1)
+				port:FireServer('lua', script, selection)
 			else
 				output('? What')
 			end
