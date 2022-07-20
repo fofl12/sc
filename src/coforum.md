@@ -19,8 +19,8 @@ Threads should be posted in threads by adding a new key in the board DataStore, 
 }
 ```
 All threads should create a new Datastore, that should be the name of the board appended by a slash and the random UUID. Examples:
-* coforum.foo.bar/1234-5678-9123
-These datastores must have the key "0" in them, which is the first post in the thread.
+* coforum.foo.bar/1234-5678-9123  
+These datastores must have at least one post in them.
 
 ## Posts in threads
 Every post in the thread must be a new key in the datastore of the original thread, with the names being random UUIDs generated with HttpService. The content of the key should follow the following example:
@@ -28,7 +28,7 @@ Every post in the thread must be a new key in the datastore of the original thre
 {
 	"message": {
 		"content": "Example post",
-		"prevhash": "987654321FEDCAB", // hash of previous post, not required if first message
+		"timestamp": "123456789", // unix time of when the post is created
 		"author": "123456789ABCDEF",
 	},
 	"signature": "123456789ABCDEF"
@@ -41,7 +41,7 @@ Posts may optionally attach assets and files to their posts, by adding the attac
 {
 	"message": {
 		"content": "Example post",
-		"prevhash": "987654321FEDCAB",
+		"timestamp": "123456789",
 		"attachments": [
 			{
 				"type": "image", // sound, mesh and video are also valid asset types
