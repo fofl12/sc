@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<rss version="2.0">
+	<channel>
+		<title>AMAZING RSS FEED</title>
+		<description>BEST RSS FEED</description>
+		<link>https://example.com</link>
+		<lastBuildDate>Mon, 6 September 2010 00:01:00 +0000</lastBuildDate>
+		<pubDate>Mon, 6 Semptember 2010 00:01:00</pubDate>
+
+		<item>
+			<title>BEST ENTRY EVER</title>
+			<description>THIS IS OBJECTIVELY THE BEST ENTRY EVER</description>
+			<link>http://example.com</link>
+			<guid>7bd204c6-1655-4c27-aeee-53f933c5395f</guid>
+			<pubDate>Mon, 6 September 2010 00:01:00 +0000</pubDate>
+		</item>
+	</channel>
+</rss>

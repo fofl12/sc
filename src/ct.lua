@@ -62,6 +62,7 @@ do
 	manual.Name = 'CTManual'
 	manual.ToolTip = 'Handbook for ctools'
 	local manualHandle = Instance.new('Part', manual)
+	manualHandle.Size = Vector3.one
 	manualHandle.Name = 'Handle'
 	NLS([==[
 		local gui = Instance.new('ScreenGui')
@@ -93,8 +94,8 @@ do
 - bool [property name] [value]: set bool property of selected
 - num [property name] [value]: set number property of selected
 - str [propery name] [value]: set string property of selected
-- new [classname?]: create a new BasePart in building dir
-- tnew [classname]: create a new instance in building dir
+- new [classname?] [parentInSelection?]: create a new BasePart in building dir
+- tnew [classname] [parentInSelection?]: create a new instance in building dir
 - dir: show root directory structure
 - hideDir: hide screen from dir
 - import: import external selected object to building dir
@@ -119,6 +120,12 @@ screen.Name = 'Screen'
 screen.Size = Vector3.new(0, 1, 1.5)
 screen.Material = 'SmoothPlastic'
 screen.Parent = handle
+local gui = Instance.new('SurfaceGui', screen)
+gui.Face = 'Left'
+local labe = Instance.new('TextBox', gui)
+labe.TextScaled = true
+labe.Text = 'INDUSTRAIL BUILDING LOGGING DEVICE'
+labe.Size = UDim2.fromScale(1, 1)
 local weld = Instance.new('Weld')
 weld.Part0 = handle
 weld.Part1 = screen
@@ -174,7 +181,8 @@ port.OnServerEvent:Connect(function(player, mode, ...)
 	elseif mode == 'create' then
 		local position = ({...})[1]
 		local type = ({...})[2]
-		local part = Instance.new(type, buildFolder)
+		local parent = ({...})[3]
+		local part = Instance.new(type, parent or buildFolder)
 		part.Name = adjectives[math.random(1,#adjectives)] .. nouns[math.random(1,#nouns)]
 		if position then
 			part.Position = position
@@ -358,9 +366,9 @@ NLS([[
 			elseif command[1] == 'new' then
 				local rp = mouse.Hit.p
 				local pos = Vector3.new(math.round(rp.X / snap) * snap, math.round(rp.Y / snap) * snap, math.round(rp.Z / snap) * snap)
-				port:FireServer('create', pos, command[2] or 'Part')
+				port:FireServer('create', pos, command[2] or 'Part', command[3] and selection or false)
 			elseif command[1] == 'tnew' then
-				port:FireServer('create', false, command[2])
+				port:FireServer('create', false, command[2], command[3] and selection or false)
 			elseif command[1] == 'dir' then
 				port:FireServer('dir', true)
 			elseif command[1] == 'hideDir' then
