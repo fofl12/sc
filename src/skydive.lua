@@ -19,7 +19,7 @@ for _, p in next, game:service'Players':GetChildren() do
 	end)
 end
 
-local onNewMessage = game.ReplicatedStorage.DefaultChatSystemChatEvents:GetChildren()[1]
+local onNewMessage = game:FindFirstChild('SB_2', true)
 local message = 'Say ":e skydive" to skydive'
 onNewMessage:FireAllClients({
 	MessageType = 'Message',

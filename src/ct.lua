@@ -79,7 +79,6 @@ do
 # Keymap
 . set mode
 , start command
-; end command
 
 # Modes
 - g: Move

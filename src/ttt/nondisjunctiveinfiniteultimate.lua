@@ -1,3 +1,5 @@
+-- I think the name clearly summarizes it
+
 local offset = owner.Character.Head.Position - Vector3.new(0, 4)
 local players = game:GetService('Players')
 
@@ -5,7 +7,7 @@ local grup = Instance.new('Model', script)
 local sign = Instance.new('Part')
 sign.Name = 'Head'
 sign.Size = Vector3.new(5, 1, 1)
-sign.Position = offset + Vector3.new(0, 0, 20)
+sign.Position = offset + Vector3.new(0, 0, -1)
 sign.Parent = grup
 local hum = Instance.new('Humanoid', grup)
 
@@ -53,83 +55,58 @@ local turn = 1
 local nextTurn = false
 local board = {}
 
-local function claim(zx, zy)
+local function claim(board)
 	local spot = turn == 1 and spot1 or spot2
 	local function claimed(b)
 		return b.BrickColor == spot.BrickColor
 	end
 	-- horizontal claim
 	for z = 0, 2 do
-		if claimed(board[zx][zy + z]) and claimed(board[zx + 1][zy + z]) and claimed(board[zx + 2][zy + z]) then
+		if claimed(board[0][z]) and claimed(board[1][z]) and claimed(board[2][z]) then
 			return true
 		end
 	end
 	-- vertical claim
 	for z = 0, 2 do
-		if claimed(board[zx + z][zy]) and claimed(board[zx + z][zy + 1]) and claimed(board[zx + z][zy + 2]) then
+		if claimed(board[z][0]) and claimed(board[z][1]) and claimed(board[z][2]) then
 			return true
 		end
 	end
 	-- diagonal claim
-	if claimed(board[zx][zy]) and claimed(board[zx + 1][zy + 1]) and claimed(board[zx + 2][zy + 2]) then
+	if claimed(board[0][0]) and claimed(board[1][1]) and claimed(board[2][2]) then
 		return true
 	end
-	if claimed(board[zx][zy + 2]) and claimed(board[zx + 1][zy + 1]) and claimed(board[zx + 2][zy]) then
+	if claimed(board[0][2]) and claimed(board[1][1]) and claimed(board[2][0]) then
 		return true
 	end
 	return false
 end
-local function tie(zx, zy)
+local function tie(board)
 	local function taken(x, y)
 		local cell = board[x][y]
 		return cell.BrickColor == spot1.BrickColor or cell.BrickColor == spot2.BrickColor
 	end
-	if not claim(zx, zy) then
+	if not claim(board) then
 		local claimed = 0
 		for x = 0, 2 do
 			for y = 0, 2 do
-				claimed += taken(zx + x, zy + y) and 1 or 0
+				claimed += taken(x, y) and 1 or 0
 			end
 		end
 		return claimed == 9
 	end
 	return false
 end
-local function superclaim()
-	local spot = turn == 1 and spot1 or spot2
-	local function claimed(x, y)
-		return claim(x * 3, y * 3)
-	end
-	-- horizontal claim
-	for z = 0, 2 do
-		if claimed(0, z) and claimed(1, z) and claimed(2, z) then
-			return true
-		end
-	end
-	-- vertical claim
-	for z = 0, 2 do
-		if claimed(z, 0) and claimed(z, 1) and claimed(z, 2) then
-			return true
-		end
-	end
-	-- diagonal claim
-	if claimed(0, 0) and claimed(1, 1) and claimed(2, 2) then
-		return true
-	end
-	if claimed(0, 2) and claimed(1, 1) and claimed(2, 0) then
-		return true
-	end
-	return false
-end
 
 local defaultcolor = Instance.new('Part').BrickColor
+local size = 2
 for x = 0, 8 do
 	board[x] = {}
 	for y = 0, 8 do
 		local zx, zy = math.floor(x / 3) * 3, math.floor(y / 3) * 3
 		local cell = Instance.new('Part')
 		cell.Size = Vector3.new(1.5, 1, 1.5)
-		cell.Position = offset + Vector3.new((x * 2) - 9, 0, (y * 2))
+		cell.Position = offset + Vector3.new((x * 2) + (zx * 0.25) - 9 , 0, (y * 2) + (zy * 0.25))
 		cell.Anchored = true
 		cell.Parent = script
 		local detector = Instance.new('ClickDetector', cell)
@@ -137,14 +114,14 @@ for x = 0, 8 do
 			if cell.BrickColor ~= spot1.BrickColor and cell.BrickColor ~= spot2.BrickColor then
 				if p == p1 and turn == 1 then
 					cell.BrickColor = spot1.BrickColor
-					if claim(zx, zy) then
+					if claim(board) then
 						for x = zx, zx + 2 do
 							for y = zy, zy + 2 do
 								board[x][y].BrickColor = spot1.BrickColor
 							end
 						end
 					end
-					if tie(zx, zy) then
+					if tie(board) then
 						for x = zx, zx + 2 do
 							for y = zy, zy + 2 do
 								board[x][y].BrickColor = defaultcolor
@@ -176,13 +153,54 @@ for x = 0, 8 do
 	end
 end
 
+local function clone(t)
+	local new = {}
+	for k, v in next, t do
+		if type(v) == 'table' then
+			new[k] = clone(v)
+		elseif typeof(v) == 'Instance' then
+			new[k] = v:Clone()
+		else
+			new[k] = v
+		end
+	end
+	return new
+end
+local function loop(t, f)
+	local new = {}
+	local got = false
+	for _, v in next, t do
+		if type(v) == 'table' then
+			loop(v, f)
+		elseif typeof(v) == 'Instance' then
+			got = true
+			break
+		end
+	end
+	if got then
+		f(t)
+	end
+	return new
+end
+
 while true do
 	turn = 1
 	hum.DisplayName = spot1.BrickColor.Name .. ' Turn'
 	repeat task.wait(0.1) until nextTurn
-	if superclaim() then
-		hum.DisplayName = spot1.BrickColor.Name .. ' Win!!!'
-		return
+	if claim() then
+		local oboard = board
+		local board = {
+			oboard,        clone(oboard), clone(oboard),
+			clone(oboard), clone(oboard), clone(oboard),
+			clone(oboard), clone(oboard), clone(oboard)
+		}
+		loop(board, function(t)
+			if t ~= oboard then
+				for _, i in next, t do
+					i.BrickColor = defaultcolor
+				end
+			end
+		end)
 	end
 	nextTurn = false
 	turn = 2

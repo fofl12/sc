@@ -264,5 +264,5 @@ while true do
 		_G['channel' .. CHANNEL]:Fire(awaiting)
 		awaiting = {}
 		task.wait(i)
-	end, 'ping', 'bass', 'snap', 'ping2', {Value = .15})
+	end, 'ping', 'bass', 'snap', 'ping2', {Value = .1})
 end

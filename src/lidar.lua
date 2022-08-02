@@ -36,7 +36,21 @@ params.FilterType = Enum.RaycastFilterType.Blacklist
 params.FilterDescendantsInstances = {owner.Character}
 
 local function cast(origin, dir)
-	return workspace:Raycast(origin, dir * maxdist, params)
+	local ray = workspace:Raycast(origin, dir * maxdist)
+	if ray then
+		local dist = ray.Distance
+		local color = ray.Instance.Color
+		local mat = ray.Material
+		if ray.Instance.Reflectance > 0.5 then
+			local rn = dir - (2 * dir:Dot(ray.Normal) * ray.Normal)
+			local dat = {cast(ray.Position, rn * maxdist)}
+			if #dat > 1 then
+				return dat[1] + dist, dat[2], dat[3]
+			end
+		else
+			return dist, color, mat
+		end
+	end
 end
 
 remote.OnServerEvent:Connect(function()
@@ -55,9 +69,10 @@ remote.OnServerEvent:Connect(function()
 		task.wait()
 		for x = -180, 180, 1 / ppd do
 			local cf = handle.CFrame * CFrame.Angles(math.rad(y), math.rad(-x), 0)
-			local ray = cast(cf.p, cf.LookVector)
-			if ray and ray.Distance < maxdist then
-				table.insert(points, ray)
+			local dat = {cast(cf.p, cf.LookVector)}
+			if #dat > 1 then
+				dat[1] *= cf.LookVector * scale
+				table.insert(points, dat)
 			end
 			if x % 32 == 0 then
 				task.wait()
@@ -69,9 +84,9 @@ remote.OnServerEvent:Connect(function()
 	print('Rendering')
 	for i, ray in ipairs(points) do
 		local point = point:Clone()
-		point.Position = ((ray.Position - offset) * scale) + offset
-		point.Color = ray.Instance.Color
-		point.Material = ray.Material
+		point.Position = ray[1] + offset
+		point.Color = ray[2]
+		point.Material = ray[3]
 		point.Parent = script
 		if i % 32 == 0 then
 			task.wait(1/30)

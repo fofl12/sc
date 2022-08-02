@@ -1,15 +1,3 @@
-Play = function(note, speed)
-	out = out .. "p," .. note .. "," .. speed .. ";"
-end
-W = function(duration)
-	out = out .. "w," .. duration .. ";"
-end
-speed = {Value = 0.15}
-bass = 1
-snap = 2
-ping = 3
-ping2 = 4
-
 bp = 1.6
 		for i = 1,4 do
 			for i = 1,2 do

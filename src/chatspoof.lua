@@ -1,20 +1,20 @@
-local onNewMessage = game.ReplicatedStorage.DefaultChatSystemChatEvents['1']
+local p = Instance.new('RemoteEvent', owner.PlayerGui)
+local players = game:GetService('Players')
+NLS([[
+local p = script.Parent
+script.Parent = p.Parent
+p.Parent = script
 
-local message = ''
-local author = ''
-onNewMessage:FireAllClients({
-	MessageType = 'Message',
-	MessageRaw = message,
-	Message = message,
-	MessageLength = #message,
-	SpeakerUserId = 1,
-	OriginalChannel = 'SERVER',
-	Time = os.time(),
-	FromSpeaker = author,
-	Id = math.random(6000, 1000000),
-	IsFiltered = true,
-	IsFilterResult =  false,
-	ExtraData = {
-		NameColor = Color3.new(0.00392157, 0.635294, 1)
-	},
-}, 'SERVER')
+local event = game:FindFirstChild('SB_10', true)
+p.OnClientEvent:Connect(function(m)
+	task.wait(0.2)
+	event:FireServer('t', 'SERVER')
+end)
+]], p)
+for _, plr in next, players:GetPlayers() do
+	plr.Chatted:Connect(function(m)
+		if m:find('is quite') then
+			p:FireClient(owner)
+		end
+	end)
+end
