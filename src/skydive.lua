@@ -19,6 +19,7 @@ for _, p in next, game:service'Players':GetChildren() do
 	end)
 end
 
+--[[
 local onNewMessage = game:FindFirstChild('SB_2', true)
 local message = 'Say ":e skydive" to skydive'
 onNewMessage:FireAllClients({
@@ -37,3 +38,4 @@ onNewMessage:FireAllClients({
 		NameColor = Color3.fromRGB(255, 0, 0)
 	},
 }, 'SERVER')
+]]

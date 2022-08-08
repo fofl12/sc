@@ -8,51 +8,51 @@ local ROM = http:GetAsync(ROM_URL)
 -- No more bit 32 ,only byte()
 print(#ROM)
 for instruction = 0x0, 0x49E, 2 do
-	local b1, b2 = ROM:sub(instruction+1, instruction+1):byte(),ROM:sub(instruction+2, instruction+2):byte()
-	print(b1, b2, instruction/2)
-	local code = b2 + (b1 * 2) -- im dumb
-	local cat = bit32.extract(code, 0, 4)
-	if code == 0x0 then
+	local b1, b2 = ROM:sub(instruction+1, instruction+1):byte(), ROM:sub(instruction+2, instruction+2):byte()
+	local code = b1 * 2 + b2
+	local cat = bit32.extract(b1, 0, 4)
+	print(cat, instruction / 2)
+	if cat == 0x0 then
 		-- either clear screen or return from subroutine, shut up superchip!
 		if (bit32.extract(code, 12, 4) == 0x0) then
 			print("Clear screen")
 		else
 			print("Return from subroutine")
 		end
-	elseif code == 0x1 then
+	elseif cat == 0x1 then
 		-- jump to address NNN
 		local nnn = bit32.extract(code, 4, 12)
 		print("Jump to address: " .. nnn)
-	elseif code == 0x2 then
+	elseif cat == 0x2 then
 		-- jump to subroutine at address NNN
 		local nnn = bit32.extract(code, 4, 12)
 		print("Jump to subroutine at addres: " .. nnn)
-	elseif code == 0x3 then
+	elseif cat == 0x3 then
 		-- skip next instruction if vX == NN
 		local vx = bit32.extract(code, 4, 4)
 		local nn = bit32.extract(code, 8, 8)
 		print("Skip next instruction if v" .. vx .. " == " .. nn)
-	elseif code == 0x4 then
+	elseif cat == 0x4 then
 		-- skip next instruction if vX != NN
 		local vx = bit32.extract(code, 4, 4)
 		local nn = bit32.extract(code, 8, 8)
 		print("Skip next instruction if v" .. vx .. " != " .. nn)
-	elseif code == 0x5 then
+	elseif cat == 0x5 then
 		-- skip next instruction if vX == vy
 		local vx = bit32.extract(code, 4, 4)
 		local vy = bit32.extract(code, 8, 4)
 		print("Skip next instruction if v" .. vx .. " == v" .. vy)
-	elseif code == 0x6 then
+	elseif cat == 0x6 then
 		-- set NN to vX
 		local vx = bit32.extract(code, 4, 4)
 		local nn = bit32.extract(code, 8, 8)
 		print("Set v" .. vx .. " to " .. nn)
-	elseif code == 0x7 then
+	elseif cat == 0x7 then
 		-- add NN to vX
 		local vx = bit32.extract(code, 4, 4)
 		local nn = bit32.extract(code, 8, 8)
 		print("Add " .. nn .. " to v" .. vx)
-	elseif code == 0x8 then
+	elseif cat == 0x8 then
 		local type = bit32.extract(code, 12, 4)
 		if code == 0 then
 			-- Set vX to vY
@@ -98,29 +98,32 @@ for instruction = 0x0, 0x49E, 2 do
 			local vx = bit32.extract(code, 4, 4)
 			print("Shift v" .. vx .. " left, bit 0 vF")
 		end
-	elseif code == 0x9 then
+	elseif cat == 0x9 then
 		-- skip next instruction if vX != vY
 		local vx = bit32.extract(code, 4, 4)
 		local vy = bit32.extract(code, 8, 4)
 		print("Skip next instruction if v" .. vx .. " != v" .. vy)
-	elseif code == 0xa then
+	elseif cat == 0xa then
 		-- set I to NNN
 		local nnn = bit32.extract(code, 4, 12)
 		print("Set I to " .. nnn)
-	elseif code == 0xb then
+	elseif cat == 0xb then
 		-- jump to address NNN .. v0
 		local nnn = bit32.extract(code, 4, 12)
 		print("Jump to " .. nnn .. " .. v0")
-	elseif code == 0xc then
+	elseif cat == 0xc then
 		-- set vX to the AND of a random number and NN
 		local vx = bit32.extract(code, 4, 4)
 		local nn = bit32.extract(code, 8, 8)
 		local rand = math.random(0, 0xff)
 		print("Set v" .. vx .. " to the AND of " .. nn .. " and " .. rand)
-	elseif code == 0xd then
+	elseif cat == 0xd then
 		-- draw sprite I to vX, vY with height N. all drawing is XOR drawing
-
-	elseif code == 0xe then
+		local vx = bit32.extract(code, 4, 4)
+		local vy = bit32.extract(code, 8, 4)
+		local n = bit32.extract()
+		print("Draw sprite I to vX, vY with height N.")
+	elseif cat == 0xe then
 		-- if key n is pressed/not pressed then skip next instruction
 		local key = bit32.extract(code, 4, 4)
 		if bit32.extract(code, 8, 4) == 9 then
@@ -130,7 +133,7 @@ for instruction = 0x0, 0x49E, 2 do
 			-- not pressed
 			print("Check if key " .. key .. " is not pressed")
 		end
-	elseif code == 0xf then
+	elseif cat == 0xf then
 		-- ;pointlaugh
 	end
 end

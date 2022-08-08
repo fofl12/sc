@@ -1,5 +1,5 @@
 local branchAngle = math.rad(20)
-local growspeed = 20
+local growspeed = 100
 local sizeFactor = 0.8
 local maxLayers = 6
 local baseColor = Color3.fromRGB(114, 60, 30)

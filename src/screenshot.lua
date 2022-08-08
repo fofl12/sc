@@ -14,6 +14,7 @@ mesh.TextureId = 'rbxassetid://515752160'
 mesh.Scale = Vector3.new(0.03, 0.05, 0.05)
 
 i.Triggered:Connect(function(p)
+	print('activate for', p)
 	NLS([[
 		local sh = game:GetService('GuiService'):FindFirstChild('ScreenshotHud')
 		assert(sh, 'ScreenshotHud is disabled! Please try again after the flag has been enabled')

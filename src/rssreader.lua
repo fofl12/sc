@@ -288,5 +288,6 @@ local function sendMessage(text, author)
 end
 
 for _, item in ipairs(items) do
+	print(item.name, item.title)
 	sendMessage('<b>' .. item.title .. '</b><br/>' .. item.desc, item.name)
 end

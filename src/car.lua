@@ -102,7 +102,7 @@ do
 	infoLabel.TextWrapped = true
 	infoLabel.Font = 'Code'
 	infoLabel.TextColor3 = Color3.fromRGB(130, 242, 145)
-	infoLabel.Text = '  COPYRIGHT comsurg industries 2069\nBooting ReactorOS\nLoading kernel MarcusKernel'
+	infoLabel.Text = 'RobuxDevice'
 	infoPanel.Parent = script
 end
 

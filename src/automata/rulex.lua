@@ -5,11 +5,11 @@ local width = 500
 local height = 300
 local scale = .05
 for x = 1, width do -- Initial state
-	map[1][x] = math.random() < 0.1
-	--map[1][x] = x == width / 2
+	--map[1][x] = math.random() < 0.1
+	map[1][x] = x == width / 2
 end
 
-local rule = 126
+local rule = 90
 local function alive(x, y)
 	local l = map[y - 1][x - 1] or false
 	local r = map[y - 1][x + 1] or false

@@ -14,7 +14,7 @@ local RENDER_PARAMS = {
 }
 
 local http = game:GetService('HttpService')
-local Bitmap = loadstring(http:GetAsync('https://raw.githubusercontent.com/max1220/lua-bitmap/master/bitmap.lua'))()
+local Bitmap = loadstring(http:GetAsync('https://raw.githubusercontent.com/max1220/lua-bitmap/5308e9436592238b3d1139d54d0954cb7d045e1d/bitmap.lua'))()
 local album = {}
 
 local tool = Instance.new('Tool')

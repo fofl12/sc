@@ -4,15 +4,15 @@
 		<title>sc Feed</title>
 		<description>this is best feed !</description>
 		<link>https://example.com</link>
-		<lastBuildDate>Tue, 2 July 2022 20:52:00 +0000</lastBuildDate>
-		<pubDate>Tue, 2 July 2022 20:50:00</pubDate>
+		<lastBuildDate>Tue, 2 August 2022 20:52:00 +0000</lastBuildDate>
+		<pubDate>Tue, 2 August 2022 20:50:00</pubDate>
 
 		<item>
 			<title>Test entry</title>
-			<description>'</description>
+			<description>Test description</description>
 			<link>http://example.com</link>
 			<guid>7bd204c6-1655-4c27-aeee-53f933c5395f</guid>
-			<pubDate>Tue, 2 July 2022 20:54:00 +0000</pubDate>
+			<pubDate>Tue, 2 August 2022 20:54:00 +0000</pubDate>
 		</item>
 	</channel>
 </rss>

@@ -1,5 +1,7 @@
 local rows, columns = 25, 40
 
+local uis = game:service'UserInputService'
+
 local board = Instance.new('Part')
 board.Position = owner.Character.Head.Position + Vector3.new(0, 2)
 board.Size = Vector3.new(12, 12, 0)
@@ -129,34 +131,138 @@ out('Welcome to Marcuskernel !\n')
 out('Establishing input connection...\n')
 local remote = Instance.new('RemoteEvent', owner.PlayerGui)
 NLS([[
+local uis = game:service'UserInputService'
 local remote = script.Parent
 
 local ui = Instance.new('ScreenGui')
 local frame = Instance.new('Frame')
-frame.Size = UDim2.fromOffset(400, 20)
+frame.Size = UDim2.fromOffset(20, 20)
 frame.AnchorPoint = Vector2.one
 frame.Position = UDim2.fromScale(1, 1)
 frame.Parent = ui
 
 local message = Instance.new('TextBox')
 message.Text = ''
-message.ClearTextOnFocus = false
 message.Size = UDim2.fromScale(1, 1)
 message.Parent = frame
 
 message.FocusLost:Connect(function(r)
 	if r then
-		remote:FireServer(message.Text)
-		message:CaptureFocus()
-		print(#message.Text)
+		remote:FireServer(Enum.KeyCode.Return)
+		message.Text = ''
+	end
+end)
+uis.InputBegan:Connect(function(i)
+	if i.UserInputType.Name == 'Keyboard' and message:IsFocused() then
+		remote:FireServer(i.KeyCode)
+		message.Text = ''
+	end
+end)
+uis.InputEnded:Connect(function(i)
+	if i.KeyCode.Name == 'LeftShift' and message:IsFocused() then
+		remote:FireServer(i.KeyCode)
 	end
 end)
 
 ui.Parent = script
 ]], remote)
+local shiftmap = {
+	['1'] = '!',
+	['2'] = '@',
+	['3'] = '#',
+	['4'] = '$',
+	['5'] = '%',
+	['6'] = '^',
+	['7'] = '&',
+	['8'] = '*',
+	['9'] = '(',
+	['0'] = ')',
+	['-'] = '_',
+	['='] = '+',
+	['['] = '{',
+	[']'] = '}',
+	[';'] = ':',
+	["'"] = '"',
+	['\\'] = '|',
+	[','] = '<',
+	['.'] = '>',
+	['/'] = '?'
+}
+local cmap = {
+	One = '1',
+	Two = '2',
+	Three = '3',
+	Four = '4',
+	Five = '5',
+	Six = '6',
+	Seven = '7',
+	Eight = '8',
+	Nine = '9',
+	Zero = '0',
+	Minus = '-',
+	Equals = '=',
+	LeftBracket = '[',
+	RightBracket = ']',
+	Semicolon = ';',
+	Quote = "'",
+	QuotedDouble = '"',
+	BackSlash = '\\',
+	Comma = ',',
+	Period = '.',
+	Slash = '/',
+	Space = ' '
+}
+local function input()
+	local message = ''
+	local done = false
+	local shift = false
+	repeat
+		local input = select(2, remote.OnServerEvent:Wait())
+		local string = uis:GetStringForKeyCode(input)
+		if #string > 1 then
+			string = cmap[string] or '?'
+		end
+		if input.Name == 'Return' then
+			done = true
+		elseif input.Name == 'Backspace' then
+			if #message > 0 then
+				message = message:sub(1, -2)
+				x -= 1
+				if x < 0 then
+					x = columns - 1
+					y -= 1
+				end
+				grid[x][y].Text = ''
+			end
+		elseif input.Name == 'Tab' then
+			message ..= '    '
+		elseif input.Name == 'LeftShift' then
+			shift = not shift
+			print(shift)
+		elseif shiftmap[string] then
+			if shift then
+				string = shiftmap[string]
+			end
+			message ..= string
+			out(string)
+			print'special'
+		elseif shift then
+			message ..= string:upper()
+			out(string:upper())
+		else
+			message ..= string:lower()
+			out(string:lower())
+		end
+		print(done)
+	until done
+	return message
+end
+
+
 out('Initiating REPL...\n')
 local env = {}
 env = {
+	ps = "] ",
 	out = out,
 	outconf = function(b, f)
 		bg = b
@@ -266,9 +372,9 @@ env = {
 	end,
 }
 while true do
-	out('] ')
-	local message = select(2, remote.OnServerEvent:Wait())
-	out(message .. '\n')
+	out(env.ps)
+	local message = input()
+	out('\n')
 	local loaded = loadstring(message)
 	if not loaded then
 		env.outconf(Color3.new(), Color3.new(1, 0, 0))

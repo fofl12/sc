@@ -1,7 +1,7 @@
 local plane = Instance.new('Part')
 plane.Size = Vector3.new(1, 1, 2)
 plane.Position = owner.Character.Head.Position
-plane.Parent = script
+plane.Parent = owner.Character
 plane:SetNetworkOwner(owner)
 
 local velocity = Instance.new('BodyVelocity', plane)
@@ -103,3 +103,7 @@ remote.OnServerEvent:Connect(function(p, m, dat)
 		end
 	end
 end)
+while true do
+	task.wait()
+	plane:SetNetworkOwner(owner)
+end
