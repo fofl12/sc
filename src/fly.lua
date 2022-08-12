@@ -1,7 +1,7 @@
 local plane = Instance.new('Part')
 plane.Size = Vector3.new(1, 1, 2)
 plane.Position = owner.Character.Head.Position
-plane.Parent = owner.Character
+plane.Parent = script
 plane:SetNetworkOwner(owner)
 
 local velocity = Instance.new('BodyVelocity', plane)

@@ -243,24 +243,3 @@ remote.OnServerEvent:Connect(function(plr, mode, dat)
 		end
 	--end
 end)
-
-run([[
-vng.allocateVectors(9)
-
--- V
-vng.line({50, 50}, {100, 250}, 4)
-vng.line({100, 250}, {150, 50}, 4)
-
--- N
-vng.line({150, 250}, {150, 150}, 4)
-vng.line({150, 150}, {200, 250}, 4)
-vng.line({200, 250}, {200, 150}, 4)
-
--- G
-vng.line({225, 200}, {275, 150}, 4)
-vng.line({225, 200}, {275, 250}, 4)
-vng.line({275, 250}, {325, 200}, 4)
-vng.line({325, 200}, {275, 200}, 4)
-wait(1.5)
-vng.clear()
-]])

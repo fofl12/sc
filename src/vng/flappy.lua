@@ -1,4 +1,4 @@
-vng.allocateVectors(4)
+vng.allocateVectors(6)
 vng.conf.fps(20)
 
 local ey = 200
@@ -10,9 +10,11 @@ local start = false
 local timer = 0
 
 return function()
-	timer += 1
-	if timer > 40 then
-		start = true
+	if not start then
+		timer += 1
+		if timer > 40 then
+			start = true
+		end
 	end
 	if start and not over then
 		pd -= 2

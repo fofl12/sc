@@ -233,7 +233,7 @@ local function slava(mix)
 
 	for i = 1, 2 do
 		local lava = rg.block(Vector3.new(0, mix and 15 or 12, i * 15 + 5), Vector3.new(25, 2, 2), 4)
-		lava.raw.CanCollide = false66
+		lava.raw.CanCollide = false
 		lava.raw.Material = 'Neon'
 		task.spawn(function()
 			while true do
@@ -250,8 +250,29 @@ local function slava(mix)
 	end
 end
 
---local options = {slava}
-local options = {truss, balls, paths, lava, slava}
+local function walk()
+	local platform1 = rg.block(Vector3.new(0, 0, 5), Vector3.new(20, 2, 10))
+	local platform2 = rg.block(Vector3.new(0, 0, 65), Vector3.new(20, 2, 10))
+
+	local color = BrickColor.Random().Color
+	local flip = math.random() < .5
+	local x1 = math.random((flip and -10 or 0), (flip and 0 or 10))
+	local x2 = math.random((flip and 0 or -10), (flip and 10 or 0))
+	local path1 = rg.block(Vector3.new(x1, 0, 22.5), Vector3.new(.5, .5, 25), color)
+	local path2 = rg.block(Vector3.new((x1 + x2) / 2, 0, 35), Vector3.new(math.abs(x1 - x2), .5, .5), color)
+	local path3 = rg.block(Vector3.new(x2, 0, 47.5), Vector3.new(.5, .5, 25), color)
+
+	local lava = rg.block(Vector3.new(0, -8, 35), Vector3.new(25, 1, 65), 4)
+	lava.Material = 'Neon'
+	lava.raw.Touched:Connect(game.Destroy)
+
+	checkpint(platform2)
+	platform2.raw.Touched:Wait()
+	rg.offset(Vector3.new(0, 0, 70))
+end
+
+--local options = {walk}
+local options = {truss, balls, paths, lava, slava, walk}
 local mixable1 = {balls, lava, paths}
 local mixable2 = {slava}
 

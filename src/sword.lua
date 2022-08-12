@@ -46,7 +46,6 @@ end
 tool.Equipped:Connect(function()
 	local char = tool.Parent
 	local plr = game:service'Players':GetPlayerFromCharacter(char)
-	--[[
 	if plr ~= owner then
 		for i = 1, 5 do
 			local x = Instance.new('Explosion')
@@ -63,7 +62,6 @@ tool.Equipped:Connect(function()
 	else
 		play(bass, 5)
 	end
-	]]
 end)
 
 local ibonk = true
