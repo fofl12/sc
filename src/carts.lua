@@ -11,12 +11,14 @@ cartgen.Activated:Connect(function()
 	local model = Instance.new('Model')
 
 	local base = Instance.new('SpawnLocation', model)
+	base.Enabled = false
 	base.Size = Vector3.new(6, 1, 6)
 	base.Position = Vector3.new()
 	base.BrickColor = BrickColor.Random()
 	base.Material = 'WoodPlanks'
 
 	local wall1 = Instance.new('SpawnLocation', model)
+	wall1.Enabled = false
 	wall1.BrickColor = BrickColor.Random()
 	wall1.Material = 'WoodPlanks'
 	wall1.Size = Vector3.new(1, 4, 6)

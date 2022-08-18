@@ -9,7 +9,7 @@ NLS([[
 	Instance.new('ForceField', owner.Character)
 	c.Parent = workspace
 	while true do
-		task.wait(1/15)
+		task.wait()
 		remote:FireServer(
 			c.Head.CFrame, c.Torso.CFrame, c['Left Arm'].CFrame,
 			c['Right Arm'].CFrame, c['Left Leg'].CFrame, c['Right Leg'].CFrame

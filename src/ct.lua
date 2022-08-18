@@ -104,6 +104,7 @@ do
 - cd [name]: change building dir, use .. to go up
 - snap [number]: set snap to [number] studs
 - rotsnap [number]: set rotation snap to [number] degrees
+- cd [name]: set selection to an instance in the selection, .. to go up
 ]]
 		script.Parent.Equipped:Connect(function()
 			gui.Parent = owner.PlayerGui
@@ -233,12 +234,6 @@ port.OnServerEvent:Connect(function(player, mode, ...)
 		export:SetAttribute('isCtRoot', true)
 		buildFolder:ClearAllChildren()
 		export.Parent = workspace
-	elseif mode == 'cd' then
-		if ({...})[1] == '..' and buildFolder ~= rootFolder then
-			buildFolder = buildFolder.Parent
-		else
-			buildFolder = buildFolder[({...})[1]]
-		end
 	elseif mode == 'lua' then
 		local script = ({...})[1]
 		local object = ({...})[2]
