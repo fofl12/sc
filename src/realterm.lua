@@ -264,6 +264,9 @@ local env = {}
 env = {
 	ps = "] ",
 	out = out,
+	grid = function(x, y)
+		return grid[x][y]
+	end,
 	outconf = function(b, f)
 		bg = b
 		fg = f

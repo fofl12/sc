@@ -5,7 +5,7 @@ cat.Shape = 'Ball'
 
 local dog = cat:Clone()
 
-local ic, id = 50, 50
+local ic, id = 500, 500
 local hint = Instance.new('Hint', script)
 hint.Text = ('Dog %i\nCat %i'):format(ic, id)
 
