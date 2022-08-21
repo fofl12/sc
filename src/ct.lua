@@ -238,10 +238,13 @@ port.OnServerEvent:Connect(function(player, mode, ...)
 		buildFolder:ClearAllChildren()
 		export.Parent = workspace
 	elseif mode == 'mark' then
-		print(...)
 		local selected = ({...})[1]
 		local name = ({...})[2]
 		_G[name] = selected
+	elseif mode == 'lua' then
+		local selected = ({...})[1]
+		local script = ({...})[2]
+		NS(script, selected)
 	end
 end)
 NLS([[
@@ -361,6 +364,8 @@ NLS([[
 			elseif m:sub(1, 1) == ',' then
 				local command = m:sub(2, -2):split(' ')
 				handleCommand(command)
+			elseif m:sub(1, 1) == '=' then
+				port:FireServer('lua', selection, m:sub(2, -1))
 			end
 		end
 	end)
