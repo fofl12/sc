@@ -80,6 +80,7 @@ do
 # Keymap
 . set mode
 , start command
+; end command
 
 # Modes
 - g: Move
@@ -89,6 +90,7 @@ do
 - x: Remove
 
 # Commands
+- oldInputMethod [bool]: set if you want to use the old input method
 - color [brickcolor code]: set color of selected
 - mat [material code]: set material of selected
 - bool [property name] [value]: set bool property of selected
@@ -241,6 +243,7 @@ port.OnServerEvent:Connect(function(player, mode, ...)
 	end
 end)
 NLS([[
+	local oldListen = false
 	local snap = 1
 	local rotsnap = math.rad(45)
 	local typing = false
@@ -285,8 +288,84 @@ NLS([[
 	local selection = nil
 	local origin = nil
 
+	local function handleCommand(command) -- for parity on commands
+		if command[1] == 'color' then
+			port:FireServer('prop', selection, BrickColor.new(tonumber(command[2])), 'BrickColor')
+		elseif command[1] == 'mat' then
+			port:FireServer('prop', selection, command[2], 'Material')
+		elseif command[1] == 'bool' then
+			port:FireServer('prop', command[4] or selection, command[3] == 'true' and true or false, command[2])
+		elseif command[1] == 'num' then
+			local num, _ = command[3]:gsub("/", ".")
+			port:FireServer('prop', command[4] or selection, tonumber(num), command[2])
+		elseif command[1] == 'str' then
+			port:FireServer('prop', command[4] or selection, command[3], command[2])
+		elseif command[1] == 'new' then
+			local rp = mouse.Hit.p
+			local pos = Vector3.new(math.round(rp.X / snap) * snap, math.round(rp.Y / snap) * snap, math.round(rp.Z / snap) * snap)
+			port:FireServer('create', pos, command[2] or 'Part', command[3] and selection or false)
+		elseif command[1] == 'tnew' then
+			port:FireServer('create', false, command[2], command[3] and selection or false)
+		elseif command[1] == 'dir' then
+			port:FireServer('dir', true)
+		elseif command[1] == 'hideDir' then
+			port:FireServer('dir', false)
+		elseif command[1] == 'import' then
+			port:FireServer('import', selection)
+		elseif command[1] == 'export' then
+			port:FireServer('export')
+		elseif command[1] == 'cd' then
+			port:FireServer('cd', command[2])
+		elseif command[1] == 'snap' then
+			local num, _ = command[2]:gsub("/", ".")
+			snap = num
+		elseif command[1] == 'rotsnap' then
+			local num, _ = command[2]:gsub("/", ".")
+			rotsnap = math.rad(num)
+		elseif command[1] == 'lua' then
+			local script = key:gsub(5, -1)
+			port:FireServer('lua', script, selection)
+		elseif command[1] == 'oldInputMethod' then
+			oldInput = command[2] == 'true'
+		else
+			output('? What')
+		end
+	end
+
+	owner.Chatted:Connect(function(m)
+		if not oldInput then
+			local vis = output('~ ' .. m)
+			if m:sub(1, 1) == '.' then
+				oldmode = mode
+				mode = m:sub(2, 2)
+				if mode == 'g' then
+					rotate.Visible = false
+					move.Visible = true
+				elseif mode == 'r' then
+					rotate.Visible = true
+					move.Visible = false
+				elseif mode == 's' then
+					rotate.Visible = false
+					move.Visible = true
+				elseif mode == 'c' then
+					port:FireServer('clone', selection)
+					mode = oldmode
+				elseif mode == 'x' then
+					port:FireServer('delete', selection)
+					mode = oldmode
+				else
+					mode = oldmode
+					output('Invalid mode!')
+				end
+			elseif m:sub(1, 1) == ',' then
+				local command = m:sub(2, -2):split(' ')
+				handleCommand(command)
+			end
+		end
+	end)
+
 	cas:BindAction('mode', function(_, state)
-		if state == Enum.UserInputState.Begin and not typing then
+		if state == Enum.UserInputState.Begin and oldInput and not typing then
 			local vis = output('~ .')
 			local key
 			local connection
@@ -323,7 +402,7 @@ NLS([[
 		end
 	end, false, Enum.KeyCode.Period)
 	cas:BindAction('command', function(_, state)
-		if state == Enum.UserInputState.Begin then
+		if state == Enum.UserInputState.Begin and oldInput then
 			local time = os.clock()
 			local vis = output('~ ')
 			local key = ''
@@ -347,45 +426,7 @@ NLS([[
 			typing = false
 
 			local command = key:split(' ')
-			if command[1] == 'color' then
-				port:FireServer('prop', selection, BrickColor.new(tonumber(command[2])), 'BrickColor')
-			elseif command[1] == 'mat' then
-				port:FireServer('prop', selection, command[2], 'Material')
-			elseif command[1] == 'bool' then
-				port:FireServer('prop', command[4] or selection, command[3] == 'true' and true or false, command[2])
-			elseif command[1] == 'num' then
-				local num, _ = command[3]:gsub("/", ".")
-				port:FireServer('prop', command[4] or selection, tonumber(num), command[2])
-			elseif command[1] == 'str' then
-				port:FireServer('prop', command[4] or selection, command[3], command[2])
-			elseif command[1] == 'new' then
-				local rp = mouse.Hit.p
-				local pos = Vector3.new(math.round(rp.X / snap) * snap, math.round(rp.Y / snap) * snap, math.round(rp.Z / snap) * snap)
-				port:FireServer('create', pos, command[2] or 'Part', command[3] and selection or false)
-			elseif command[1] == 'tnew' then
-				port:FireServer('create', false, command[2], command[3] and selection or false)
-			elseif command[1] == 'dir' then
-				port:FireServer('dir', true)
-			elseif command[1] == 'hideDir' then
-				port:FireServer('dir', false)
-			elseif command[1] == 'import' then
-				port:FireServer('import', selection)
-			elseif command[1] == 'export' then
-				port:FireServer('export')
-			elseif command[1] == 'cd' then
-				port:FireServer('cd', command[2])
-			elseif command[1] == 'snap' then
-				local num, _ = command[2]:gsub("/", ".")
-				snap = num
-			elseif command[1] == 'rotsnap' then
-				local num, _ = command[2]:gsub("/", ".")
-				rotsnap = math.rad(num)
-			elseif command[1] == 'lua' then
-				local script = key:gsub(5, -1)
-				port:FireServer('lua', script, selection)
-			else
-				output('? What')
-			end
+			handleCommand(command)
 		end
 	end, false, Enum.KeyCode.Comma)
 
