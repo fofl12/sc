@@ -238,6 +238,7 @@ port.OnServerEvent:Connect(function(player, mode, ...)
 		buildFolder:ClearAllChildren()
 		export.Parent = workspace
 	elseif mode == 'mark' then
+		print(...)
 		local selected = ({...})[1]
 		local name = ({...})[2]
 		_G[name] = selected
@@ -326,7 +327,7 @@ NLS([[
 		elseif command[1] == 'oldInputMethod' then
 			oldInput = command[2] == 'true'
 		elseif command[1] == 'mark' then
-			port:FireServer('mark', selected, command[2])
+			port:FireServer('mark', selection, command[2])
 		else
 			output('? What')
 		end
