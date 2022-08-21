@@ -107,6 +107,7 @@ do
 - snap [number]: set snap to [number] studs
 - rotsnap [number]: set rotation snap to [number] degrees
 - cd [name]: set selection to an instance in the selection, .. to go up
+- mark [name]: make a reference in _G to selected
 ]]
 		script.Parent.Equipped:Connect(function()
 			gui.Parent = owner.PlayerGui
@@ -236,10 +237,10 @@ port.OnServerEvent:Connect(function(player, mode, ...)
 		export:SetAttribute('isCtRoot', true)
 		buildFolder:ClearAllChildren()
 		export.Parent = workspace
-	elseif mode == 'lua' then
-		local script = ({...})[1]
-		local object = ({...})[2]
-		NS(script, object)
+	elseif mode == 'mark' then
+		local selected = ({...})[1]
+		local name = ({...})[2]
+		_G[name] = selected
 	end
 end)
 NLS([[
@@ -322,11 +323,10 @@ NLS([[
 		elseif command[1] == 'rotsnap' then
 			local num, _ = command[2]:gsub("/", ".")
 			rotsnap = math.rad(num)
-		elseif command[1] == 'lua' then
-			local script = key:gsub(5, -1)
-			port:FireServer('lua', script, selection)
 		elseif command[1] == 'oldInputMethod' then
 			oldInput = command[2] == 'true'
+		elseif command[1] == 'mark' then
+			port:FireServer('mark', selected, command[2])
 		else
 			output('? What')
 		end
