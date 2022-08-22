@@ -262,7 +262,10 @@ NLS([[
 	listLayout.FillDirection = 'Vertical'
 	listLayout.VerticalAlignment = 'Bottom'
 	listLayout.Parent = gui
-	script.Parent = owner.PlayerGui
+	repeat
+		script.Parent = owner.PlayerGui
+		task.wait()
+	until script.Parent == owner.PlayerGui
 	local mouse = owner:GetMouse()
 	local mode = 'm'
 	local cas = game:GetService('ContextActionService')
