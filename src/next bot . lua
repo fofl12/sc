@@ -4,7 +4,10 @@ local images = {
 	'rbxassetid://6940140256',
 	'rbxassetid://6840297364',
 	'rbxassetid://6566147844',
-	'rbxassetid://6335920805'
+	'rbxassetid://6335920805',
+	'rbxassetid://6298045703',
+	'rbxassetid://6709911380',
+	'rbxassetid://7125224094'
 }
 
 for _, image in next, images do
