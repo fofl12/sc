@@ -9,7 +9,7 @@ for x = 1, width do -- Initial state
 	map[1][x] = x == width / 2
 end
 
-local rule = 120
+local rule = 110
 local function alive(x, y)
 	local l = map[y - 1][x - 1] or false
 	local r = map[y - 1][x + 1] or false

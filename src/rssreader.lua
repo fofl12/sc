@@ -38,11 +38,9 @@ local handler = loadstring(http:GetAsync(
 	'https://raw.githubusercontent.com/github-user123456789/xml2lua-roblox/master/xmlhandler/tree.lua'
 ))()
 
-
 local feeds = {
 	'https://raw.githubusercontent.com/fofl12/sc/main/src/feed.rss',
 	'https://github.com/Anuken/Mindustry/releases.atom',
-	'https://github.com/fofl12/sc/commits/main.atom',
 	'https://archlinux.org/feeds/news/',
 }
 local items = {}

@@ -1,5 +1,5 @@
 local branchAngle = math.rad(20)
-local growspeed = 100
+local growspeed = 200
 local sizeFactor = 0.8
 local maxLayers = 6
 local baseColor = Color3.fromRGB(114, 60, 30)
@@ -68,8 +68,10 @@ function tree(position, color)
 			food:SetAttribute('isFood', true)
 			table.remove(branches, id)
 			branch:Destroy()
-			if #branches > 0 then
-				branches[math.random(1, #branches)]:Destroy()
+			for i = 1, 10 do
+				if #branches > 0 then
+					branches[math.random(1, #branches)]:Destroy()
+				end
 			end
 			if math.random() < 0.04 then
 				food.Color = leafColor

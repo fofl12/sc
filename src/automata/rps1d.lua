@@ -1,6 +1,6 @@
 local map = {{}}
-local width = 100
-local height = 50
+local width = 300
+local height = 100
 for x = 1, width do
   if x == 1 then
     map[1][x] = 1
