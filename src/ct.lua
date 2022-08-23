@@ -20,7 +20,8 @@ local adjectives = {
 	'destructive',
 	'creative',
 	'blue',
-	'combusting'
+	'combusting',
+	'liquid'
 }
 
 local function dirLayout(callback, root, _recursed)
