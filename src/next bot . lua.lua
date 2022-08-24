@@ -7,8 +7,23 @@ local images = {
 	'rbxassetid://6335920805',
 	'rbxassetid://6298045703',
 	'rbxassetid://6709911380',
-	'rbxassetid://7125224094'
+	'rbxassetid://7125224094',
+	'rbxthumb://id=212632382&type=Avatar&w=150&h=150',
+	'rbxthumb://id=1&type=Avatar&w=150&h=150',
+	'rbxthumb://id=2&type=Avatar&w=150&h=150',
+	'rbxthumb://id=3&type=Avatar&w=150&h=150',
+	'rbxassetid://7514729378',
+	'rbxassetid://6072733307',
+	'rbxassetid://2994480258'
 }
+
+for _, p in next, game:service'Players':GetPlayers() do
+	table.insert(images, ('rbxthumb://id=%i&type=Avatar&w=150&h=150'):format(p.UserId))
+	for i = 1, 60 do
+		table.insert(images, ('rbxthumb://id=%i&type=Avatar&w=150&h=150'):format(p.UserId + i))
+	end
+end
+
 
 here = 'yes'
 
@@ -49,7 +64,7 @@ for _, image in next, images do
 		part.Parent = script
 
 		task.spawn(function()
-			while task.wait(1) do
+			while task.wait() do
 				local min, target = math.huge
 				for _, p in next, game:service'Players':GetPlayers() do
 					if p.Character and p.Character:FindFirstChild'Head' then
@@ -66,9 +81,11 @@ for _, image in next, images do
 		end)
 
 		part.Touched:Connect(function(p)
-			local hum = p.Parent:FindFirstChild'Humanoid'
-			if hum and p.Parent:FindFirstChild'Head' then
-				p.Parent.Head:Destroy()
+			if p.Parent then -- ?????????
+				local hum = p.Parent:FindFirstChild'Humanoid'
+				if hum and p.Parent:FindFirstChild'Head' then
+					p.Parent.Head:Destroy()
+				end
 			end
 		end)
 	end

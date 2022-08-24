@@ -1,14 +1,15 @@
 local map = {{}}
-local width = 500
-local height = 1000
+local width = 5000
+local height = 15000
 for x = 1, width do
   map[1][x] = Color3.fromRGB(math.random(0, 255), math.random(0, 255), math.random(0, 255))
 end
 
-local function simulate(left, right)
+local function simulate(left, right, middle)
   if left == right then
     return left
   end
+  -- Option 1: diff between lr
   do
 	local leftPoints = 0
 	local rightPoints = 0
@@ -33,6 +34,12 @@ local function simulate(left, right)
 		return right
 	end
   end
+  --[[do -- Option 2: lerp between lmr
+	return left:Lerp(right, 0.5):Lerp(middle, 0.5)
+  end]]
+  do -- Option 3: Random
+	return math.random() < .5 and left or right
+  end
 end
 
 for y = 1, height do
@@ -41,13 +48,14 @@ for y = 1, height do
     for x = 1, width do
       local left = map[y - 1][x - 1] or Color3.new()
       local right = map[y - 1][x + 1] or Color3.new()
-      map[y][x] = simulate(left, right)
+	  local middle = map[y - 1][x]
+      map[y][x] = simulate(left, right, middle)
     end
   end
   for x, val in ipairs(map[y]) do
-    local pixel = Instance.new('WedgePart')
+    local pixel = Instance.new('Part')
     pixel.Size = Vector3.one
-    pixel.Position = Vector3.new(x - height / 2, y, 100)
+    pixel.Position = Vector3.new(x - width / 2, y, 100)
     pixel.Anchored = true
     pixel.Color = val
     pixel.Parent = script

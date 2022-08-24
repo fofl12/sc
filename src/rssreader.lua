@@ -41,6 +41,7 @@ local handler = loadstring(http:GetAsync(
 local feeds = {
 	'https://raw.githubusercontent.com/fofl12/sc/main/src/feed.rss',
 	'https://github.com/Anuken/Mindustry/releases.atom',
+	'https://github.com/fofl12/sc/commits.atom',
 	'https://archlinux.org/feeds/news/',
 }
 local items = {}

@@ -19,12 +19,13 @@ owner.Chatted:Connect(function(m)
 end)
 
 while true do
-	task.wait(1/30)
+	task.wait()
 	if owner.Character and owner.Character:FindFirstChild('Torso') then
 		local target = owner.Character.Torso.Position + size / 2
 		label.Position = UDim2.fromScale(
 			1 - (target.Z / size.Z),
 			target.X / size.X
 		)
+		label.Rotation = -owner.Character.Torso.Orientation.Y + 90
 	end
 end
