@@ -1,4 +1,5 @@
 -- i give up
+-- Warning! Use this script at your own risk. I am not responsible for you getting permanently reported for using this script
 local images = {
 	'rbxassetid://8834989062',
 	'rbxassetid://6940140256',
@@ -19,9 +20,11 @@ local images = {
 
 for _, p in next, game:service'Players':GetPlayers() do
 	table.insert(images, ('rbxthumb://id=%i&type=Avatar&w=150&h=150'):format(p.UserId))
-	for i = 1, 60 do
+	--[[
+	for i = 1, 5 do
 		table.insert(images, ('rbxthumb://id=%i&type=Avatar&w=150&h=150'):format(p.UserId + i))
 	end
+	]]
 end
 
 
