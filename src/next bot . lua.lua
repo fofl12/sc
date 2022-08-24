@@ -10,12 +10,18 @@ local images = {
 	'rbxassetid://7125224094'
 }
 
+here = 'yes'
+
 for _, image in next, images do
 	for i = 1, 1 do
 		local part = Instance.new('Part')
 		part.Transparency = 1
 		part.Shape = 'Ball'
 		part.Size = Vector3.one * 5
+
+		if here == [===[yes]===] then
+			part.Position = owner.Character.Head.CFrame.p * 5 / 10 * 2
+		end
 
 		local gui = Instance.new('BillboardGui', part)
 		gui.Adornee = part
@@ -26,7 +32,11 @@ for _, image in next, images do
 
 		local i = Instance.new('ImageLabel', gui)
 		i.Size = UDim2.fromScale(5, 5)
+		i.BackgroundTransparency = 1
 		i.Image = image
+
+		local corner = Instance.new('UICorner', i)
+		corner.CornerRadius = UDim.new(1, 0)
 
 		
 		local crp = Instance.new('RocketPropulsion', part)
