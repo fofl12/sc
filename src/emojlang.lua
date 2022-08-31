@@ -95,4 +95,3 @@ sendMessage('Executing code: ', 'SYSTEM')
 sendMessage(code, 'SYSTEM')
 sendMessage('--------------------------', 'SYSTEM')
 
-local line = 

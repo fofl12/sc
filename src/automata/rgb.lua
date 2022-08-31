@@ -1,6 +1,6 @@
 local map = {{}}
-local width = 5000
-local height = 15000
+local width = 1000
+local height = 3000
 for x = 1, width do
   map[1][x] = Color3.fromRGB(math.random(0, 255), math.random(0, 255), math.random(0, 255))
 end

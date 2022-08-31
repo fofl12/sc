@@ -4,10 +4,11 @@ rem.Parent = owner.PlayerGui
 rem.OnServerEvent:Connect(function(_, pos)
   local x = Instance.new('Explosion')
   x.Position = pos
-  x.BlastRadius = 1000
+  x.BlastRadius = 8
   x.ExplosionType = 'Craters'
   x.BlastPressure = 10000000000000000
-  Instance.new('Explosion', workspace).Position = pos
+  x.Visible = false
+  x.Parent = workspace
 end)
 
 NLS([[

@@ -30,6 +30,7 @@ for i = 1, ic do -- cats
 		if cat:GetAttribute('hp') <= 0 then
 			cats[i] = nil
 			cat:Destroy()
+			dog:Destroy()
 			ic -= 1
 		elseif p:GetAttribute('dog') then
 			p:SetAttribute('hp', p:GetAttribute'hp' - math.random(40, 60))
@@ -46,6 +47,7 @@ for i = 1, id do -- dogs
 		if dog:GetAttribute('hp') <= -20 then
 			dogs[i] = nil
 			dog:Destroy()
+			cat:Destroy()
 			id -= 1
 		elseif p:GetAttribute('cat') then
 			p:SetAttribute('hp', p:GetAttribute'hp' - math.random(40, 70))
@@ -66,10 +68,12 @@ for i = 1, ic do
 	crp.ThrustP = 20000000000
 	crp.ThrustD = 200000
 	crp.MaxTorque = Vector3.new()
+	crp.Target = dog
 	crp:Fire()
 
 	local drp = crp:Clone()
 	drp.Parent = dog
+	drp.Target = cat
 	drp:Fire()
 end
 
@@ -79,40 +83,4 @@ local function clone(t)
 		n[k] = v
 	end
 	return n
-end
-
-while true do
-	task.wait(1)
-	local adogs = clone(dogs)
-	local acats = clone(cats)
-
-	for i = 1, id do
-		local dog
-		repeat
-			local id = math.random(1, #adogs)
-			dog = adogs[id]
-			table.remove(adogs, id)
-		until dog and dog.Parent
-		local cat
-		repeat
-			cat = cats[math.random(1, #cats)]
-		until cat
-		dog.RocketPropulsion.Target = cat
-		task.wait()
-	end
-	for i = 1, ic do
-		local cat
-		repeat
-			local id = math.random(1, #acats)
-			cat = acats[id]
-			table.remove(acats, id)
-		until cat and cat:FindFirstChild'RocketPropulsion'
-		local dog
-		repeat
-			dog = dogs[math.random(1, #dogs)]
-		until dog
-		cat.RocketPropulsion.Target = dog
-		task.wait()
-	end
-	print('Step')
 end
