@@ -75,7 +75,7 @@ local gui = Instance.new('SurfaceGui', board)
 gui.SizingMode = 'PixelsPerStud'
 
 local chat = Instance.new('Frame', gui)
-chat.Size = UDim2.fromScale(0.8, 1)
+chat.Size = UDim2.fromScale(1, 1)
 chat.BackgroundTransparency = 1
 local chatListLayout = Instance.new('UIListLayout', chat)
 chatListLayout.FillDirection = 'Vertical'

@@ -17,12 +17,11 @@ for x = -50, 50 do
 	end
 end
 print('Pass 1: Ore veins')
-local r = math.random(100, 250)
+local r = math.random(300, 500)
 print(r .. ' worms')
 for _ = 1, r do
 	local pos = Vector3.new(math.random(-50, 50), math.random(0, 100), math.random(-50, 50))
 	local ore = "rock"
-	print('Choosing material...')
 	repeat
 		if math.random() < .3 then
 			ore = "coal"
@@ -35,9 +34,7 @@ for _ = 1, r do
 		elseif pos.Y < 50 and math.random() < .05 then
 			ore = "diamond"
 		end
-		task.wait()
 	until ore ~= "rock"
-	print("Generating...")
 	local dir = CFrame.Angles(math.random() - .5 * 2, math.random() - .5 * 2, 0)
 	for i = 1, math.random(3, 10) do
 		if not (world[pos.X] and world[pos.X][pos.Y] and world[pos.X][pos.Y][pos.Z]) then
@@ -46,19 +43,20 @@ for _ = 1, r do
 		world[pos.X][pos.Y][pos.Z] = ore
 		pos += round(dir.LookVector)
 		dir *= CFrame.Angles(math.random() - .5 * 2, math.random() - .5 * 2, 0)
-		task.wait()
 	end
-	task.wait()
-	print(_)
+	if _ % 16 == 0 then
+		task.wait()
+		print(_)
+	end
 end
 
 print('Pass 2: Caves')
-local r = math.random(10, 20)
+local r = math.random(20, 50)
+local seed = math.random() * 10000
 print(r .. ' worms')
 for _ = 1, r do
 	local pos = Vector3.new(math.random(-50, 50), math.random(0, 100), math.random(-50, 50))
-	print(pos)
-	local dir = CFrame.Angles(math.random() - .5 * 2, math.random() - .5 * 2, 0)
+	local dir = CFrame.Angles(math.noise(pos.X + seed, pos.Y, pos.Z), math.noise(pos.X, pos.Y, pos.Z + seed), 0)
 	local thickness = math.random(2, 4)
 	for i = 1, math.random(6, 20) do
 		for x = -thickness/2, thickness/2 do
@@ -71,15 +69,19 @@ for _ = 1, r do
 			end
 		end
 		pos += round(dir.LookVector * thickness)
-		dir *= CFrame.Angles(math.random() - .5 * 2, math.random() - .5 * 2, 0)
-		task.wait()
+		dir *= CFrame.Angles(math.noise(pos.X + seed, pos.Y, pos.Z), math.noise(pos.X, pos.Y, pos.Z + seed), 0)
 	end
-	task.wait()
-	print(_)
+	
+	if _ % 16 == 0 then
+		task.wait()
+		print(_)
+	end
 end
 
 print('Rendering...')
 local real = {}
+local mineEvent = Instance.new('BindableEvent')
+_G.mine = mineEvent
 
 local function create(x, y, z)
 	--print(x, y, z)
@@ -122,10 +124,27 @@ local function create(x, y, z)
 				end
 			end
 			for _, o in next, toLoad do
+				if math.random() < .02 then
+					local ore = "rock"
+					repeat
+						if math.random() < .3 then
+							ore = "coal"
+						elseif o[2] < 85 and math.random() < .4 then
+							ore = "iron"
+						elseif o[2] < 60 and math.random() < .2 then
+							ore = "gold"
+						elseif o[2] < 75 and o[2] > 40 and math.random() < .6 then
+							ore = "copper"
+						elseif o[2] < 50 and math.random() < .05 then
+							ore = "diamond"
+						end
+					until ore ~= "rock"
+					world[o[1]][o[2]][o[3]] = ore
+				end
 				create(o[1], o[2], o[3])
 			end
 		else
-			local part = Instance.new('Part', script)
+			local part = Instance.new('Part', scrit)
 			part.Anchored = true
 			part.Size = Vector3.one * 4
 			part.Position = Vector3.new(x, y + 40, z) * 4
@@ -136,7 +155,7 @@ local function create(x, y, z)
 				ore == "iron" and Color3.fromRGB(216, 187, 147) or
 				ore == "gold" and Color3.new(1, 1, 0) or
 				ore == "copper" and Color3.new(1, .5, 0) or
-				ore == "diamond" and Color3.new(0, 0, 1)
+				ore == "diamond" and Color3.fromRGB(45, 177, 229)
 			)
 			part.Name = ore
 			part:SetAttribute('isOre', true)
@@ -158,6 +177,37 @@ local function create(x, y, z)
 					end
 				end
 			end)
+			--[[
+			workspace.Terrain:FillBlock(CFrame.new(x * 4, y + 40 * 4, z * 4), Vector3.one * 4, (
+				ore == "rock" and 'Rock' or
+				ore == "coal" and 'Basalt' or
+				ore == "iron" and 'Limestone' or
+				ore == "gold" and 'Sand' or
+				ore == "copper" and 'Sandstone' or
+				ore == "diamond" and 'Ice'
+			))
+			mine.Event:Connect(function(pos)
+				if pos.X == x and pos.Y == y and pos.Z == z then
+					workspace.Terrain:FillBlock(CFrame.new(x, y + 40, z) * 4, Vector3.one * 4, 'Air')
+					for cx = -1, 1 do
+						if not real[cx + x] then
+							real[cx + x] = {}
+						end
+						for cy = -1, 1 do
+							task.wait()
+							if not real[cx + x][cy + y] then
+								real[cx + x][cy + y] = {}
+							end
+							for cz = -1, 1 do
+								if not real[cx + x][cy + y][cz + z] then
+									create(cx + x, cy + y, cz + z)
+								end
+							end
+						end
+					end
+				end
+			end)
+			]]
 		end
 	end
 	real[x][y][z] = true
@@ -168,8 +218,8 @@ for x, _y in next, world do
 	real[x][100] = {}
 	for z, ore in next, _y[100] do
 		create(x, 100, z)
-		if z % 32 == 0 then
-			task.wait()
+		if z % 16 == 0 then
+			task.wait(1)
 		end
 	end
 end

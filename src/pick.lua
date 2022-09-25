@@ -13,8 +13,10 @@ mesh.TextureId = 'rbxassetid://1114777186'
 local port = Instance.new('RemoteEvent', tool)
 
 port.OnServerEvent:Connect(function(_, target)
-	if target:GetAttribute('isOre') then
+	if typeof(target) == 'Instance' and target:GetAttribute('isOre') then
 		target:Destroy()
+	elseif typeof(target) == 'Vector3' then
+		mine:Fire(Vector3.new(math.round(target.X * 4) / 4, math.round(target.Y * 4) / 4 - 40, math.round(target.Z * 4) / 4) / 4)
 	end
 end)
 
@@ -24,6 +26,7 @@ local hint = Instance.new('Hint', script)
 
 script.Parent.Parent.Activated:Connect(function()
 	local target = owner:GetMouse().Target
+	if not target then return end
 	if target:GetAttribute('isOre') then
 		if target.Name == 'rock' then
 			rock = rock + 1
@@ -39,6 +42,8 @@ script.Parent.Parent.Activated:Connect(function()
 			copper = copper + 1
 		end
 		script.Parent:FireServer(target)
+	elseif target == workspace.Terrain then
+		script.Parent:FireServer(owner:GetMouse().Position)
 	end
 end)
 
