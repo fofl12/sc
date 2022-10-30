@@ -14,6 +14,10 @@ local port = Instance.new('RemoteEvent', tool)
 
 port.OnServerEvent:Connect(function(_, target)
 	if typeof(target) == 'Instance' and target:GetAttribute('isOre') then
+		if target:GetAttribute('cash') then
+			local cash = owner:GetAttribute('cash') or 0
+			owner:SetAttribute('cash', cash + target:GetAttribute('cash'))
+		end
 		target:Destroy()
 	elseif typeof(target) == 'Vector3' then
 		mine:Fire(Vector3.new(math.round(target.X * 4) / 4, math.round(target.Y * 4) / 4 - 40, math.round(target.Z * 4) / 4) / 4)
