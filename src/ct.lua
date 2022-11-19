@@ -116,7 +116,7 @@ do
 		script.Parent.Unequipped:Connect(function()
 			gui.Parent = nil
 		end)
-	]==], manual)''
+	]==], manual)
 	manual.Parent = owner.Backpack
 end
 
