@@ -1,6 +1,6 @@
-local branchAngle = math.rad(20)
+local branchAngle = math.pi * 2 /11
 local growspeed = 10
-local sizeFactor = 0.8
+local sizeFactor = 0.75
 local maxLayers = 8
 local offset = owner.Character.Head.Position - Vector3.new(0, 2)
 local baseColor = Color3.fromRGB(114, 60, 30)

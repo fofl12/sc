@@ -37,7 +37,7 @@ local function filter(text)
 	local o = text:gsub(string.char(0), '[NullChar]')
 	o = o:gsub('&', '&amp;')
 	o = o:gsub('<', '&lt;')
-	o = o:gsub('>', '&rt;')
+	o = o:gsub('>', '&gt;')
 	o = o:gsub('"', '&quot;')
 	o = o:gsub("'", '&apos;')
 	return o

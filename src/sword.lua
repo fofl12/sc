@@ -28,6 +28,10 @@ task.spawn(function()
 	end
 end)
 
+local light = Instance.new('PointLight', handle)
+light.Range = 30
+light.Brightness = 0
+
 local function billthrow(pos, text)
 	print(text)
 	local ball = Instance.new('Part')
@@ -116,8 +120,9 @@ handle.Touched:Connect(function(p)
 				hum:TakeDamage(dmg)
 				billthrow(p.Position, dmg .. 'hp')
 				totalDmg += dmg
+				light.Brightness = totalDmg / 50
 				if totalDmg > threshold then
-					billthrow(p.Position, 'Reached threshold!')
+					billthrow(p.Position, 'Overload!')
 				end
 				if totalDmg > maxHp then
 					maxHp = totalDmg
@@ -125,11 +130,13 @@ handle.Touched:Connect(function(p)
 				print(totalDmg)
 				color = Color3.new(1, 0, 0)
 				task.delay(10, function()
+					if totalDmg <= 0 then return end
 					totalDmg -= dmg
 					local heal = dmg / 2
 					local hum = owner.Character.Humanoid
 					billthrow(handle.Position, '-' .. dmg - math.min(hum.MaxHealth, heal + hum.Health) + hum.Health .. 'hp...')
 					owner.Character.Humanoid.Health += heal
+					light.Brightness = totalDmg / 50
 					if totalDmg == 0 then
 						billthrow(handle.Position, 'lost ' .. maxHp .. ' hp')
 						maxHp = 0
@@ -141,11 +148,14 @@ handle.Touched:Connect(function(p)
 				hum:TakeDamage(dmg / 2)
 				billthrow(p.Position, dmg / 2 .. 'hp')
 				totalDmg += dmg
+				light.Brightness = totalDmg / 50
 				if totalDmg > threshold then
-					billthrow(p.Position, 'Reached threshold!')
+					billthrow(p.Position, 'Overload!')
 				end
 				task.delay(10, function()
+					if totalDmg <= 0 then return end
 					totalDmg -= dmg
+					light.Brightness = totalDmg / 50
 					billthrow(handle.Position, '-' .. dmg - math.min(hum.MaxHealth, heal + hum.Health) + hum.Health .. 'hp...')
 				end)
 			end
@@ -209,12 +219,12 @@ launchPrompt.Triggered:Connect(function(p)
 	if os.time() - lastLaunched > 10 and p == owner then
 		lastLaunched = os.time()
 		remote:FireClient(owner, 'Q')
-		billthrow(handle.Position, 'Acceleration')
+		billthrow(handle.Position, 'Propulsion')
 		task.delay(2, function()
-			billthrow(handle.Position, '!! Accelerator Overheat !!')
+			billthrow(handle.Position, '!! Propulsion Overheat !!')
 		end)
 	else
-		billthrow(handle.Position, 'Wait for accelerator to cool down!')
+		billthrow(handle.Position, 'Wait for propulsion to cool down!')
 	end
 end)
 local recoverPrompt = Instance.new('ProximityPrompt', handle)
@@ -263,6 +273,15 @@ owner.Chatted:Connect(function(m)
 			totalDmg = 0
 			color = nil
 			active = false
+		elseif command[1] == 'recovery' then
+			local billboard = Instance.new('BillboardGui', handle)
+			billboard.Size = UDim2.fromScale(10, 10)
+			billboard.AlwaysOnTop = true
+			local text = Instance.new('TextBox', billboard)
+			text.TextScaled = true
+			text.Text = 'Sword Recovery'
+			text.Size = UDim2.fromScale(1, 1)
+			debris:AddItem(billboard, 5)
 		end
 	end
 end)

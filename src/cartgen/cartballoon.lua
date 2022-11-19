@@ -1,13 +1,21 @@
+local function groundDist(origin)
+	local res = workspace:Raycast(origin, Vector3.yAxis * -1000)
+	if res then
+		return res.Distance, res.Instance
+	else
+		return origin.Y
+	end
+end
+
 local function cartballoongen()
 local function cartgen()
 	local model = Instance.new('Model')
 
+	local integrity = 100
+
 	local hum = Instance.new('Humanoid', model)
 	hum.MaxHealth = 400
 	hum.DisplayName = 'Taxi'
-
-	local alert = false
-	local crashed = false
 
 	local base = Instance.new('SpawnLocation', model)
 	base.Enabled = false
@@ -17,40 +25,56 @@ local function cartgen()
 	base.Material = 'WoodPlanks'
 
 	task.spawn(function()
+		local text = ''
+		local duration = 0
+		local start = os.clock()
+		local alert = false
 		while task.wait() do
+			local altitude, i = groundDist(base.Position)
 			if alert then
 				hum.Health = math.floor(os.clock() * 10) % 2 == 0 and hum.MaxHealth - 1 or 0
 			else
-				hum.Health = base.Position.Y
+				hum.Health = altitude
 			end
-	
-			
-			if base.Velocity.Magnitude < 40 and base.Position.Y < 5 and not crashed then
-				alert = false
-				hum.DisplayName = 'Taxi'
-			elseif base.Velocity.Magnitude > 40 and base.Position.Y < 5 then
-				alert = false
-				hum.DisplayName = 'Takeoff/Landing'
-			elseif base.Velocity.Y > 5 and base.Position.Y < 50 then
-				alert = false
-				hum.DisplayName = 'Ascending'
-			elseif crashed or (base.Velocity.Y < -100 and base.Position.Y < 10) then
-				if not crashed then
-					local x = Instance.new('Explosion')
-					x.Position = base.Position
-					x.Parent = base
+			hum.DisplayName = text
+			if os.clock() - start >= duration then
+				if base.Velocity.Magnitude < 40 and altitude < 5 and not crashed then
+					alert = false
+					text = 'Taxi'
+				elseif base.Velocity.Magnitude > 40 and altitude < 5 and not crashed then
+					alert = false
+					text = 'Takeoff/Landing'
+				elseif base.Velocity.Y > 5 and altitude < 50 and not crashed then
+					alert = false
+					text = 'Ascending'
+				elseif base.Velocity.Y < -20 and altitude < 10 then
+					local dmg = math.abs(base.Velocity.Y)
+					print('Hard landing...')
+					text = ('Hard landing...\nCollision at %.1f studs/second'):format(math.abs(base.Velocity.Y), dmg)
+					start = os.clock()
+					integrity -= dmg
+					duration = 5
+					if integrity <= 0 then
+						alert = true
+						text = ('ALERT\nCritical Integrity Failure\nCollision at %.1f studs/seconds'):format(math.abs(base.Velocity.Y))
+						duration = 1000000
+						local x = Instance.new('Explosion')
+						x.Position = base.Position
+						x.BlastPressure = math.abs(base.Velocity.Y) - 80
+						x.Parent = base
+						model.Head.Anchored = true
+						model:BreakJoints()
+					elseif integrity <= 20 then
+						alert = true
+						text = ('!! ALERT !!\n!! Low Integrity !!\nCollision at %.1f studs/second\nDealt %i damage'):format(math.abs(base.Velocity.Y), dmg)
+					end
+				elseif base.Velocity.Y < -75 and altitude < math.abs(base.Velocity.Y) * 5 then
+					alert = true
+					text = ('!!! ALERT !!!\n!!!!!! Pull Up !!!!!!\nCollision imminent in %.2f'):format(altitude / math.abs(base.Velocity.Y))
+				else
+					alert = false
+					text = 'Velocity: ' .. math.floor(base.Velocity.Magnitude)
 				end
-				alert = true
-				hum.DisplayName = 'ALERT\nCrash landing'
-				model.Head.Anchored = true
-				crashed = true
-				model:BreakJoints()
-			elseif base.Velocity.Y < -10 and base.Position.Y < math.abs(base.Velocity.Y) * 3 then
-				alert = true
-				hum.DisplayName = 'ALERT\n!!! Pull Up !!!'
-			else
-				alert = false
-				hum.DisplayName = 'Velocity: ' .. math.floor(base.Velocity.Magnitude)
 			end
 		end
 	end)

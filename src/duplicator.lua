@@ -14,11 +14,11 @@ do
 	local dgui = Instance.new('SurfaceGui', decter)
 	dgui.Face = 'Top'
 	local dbut =  Instance.new('TextButton', dgui)
-	dbut.Text = 'Dect'
+	dbut.Text = 'Scan'
 	dbut.Size = UDim2.fromScale(1, 1)
 	dbut.TextScaled = true
 	local bgui = dgui:Clone()
-	bgui.TextButton.Text = 'You need to dect'
+	bgui.TextButton.Text = 'You need to scan'
 	bgui.Parent = buton
 
 	dbut.MouseButton1Click:Connect(function()
@@ -34,7 +34,7 @@ do
 			if res then break end
 		end
 		if res.Parent:IsA'Tool' then
-			dbut.Text = 'Dected'
+			dbut.Text = 'Scanned'
 			sect = res.Parent
 			bgui.TextButton.Text = sect.Name
 		else

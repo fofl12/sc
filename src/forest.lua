@@ -1,6 +1,6 @@
-local branchAngle = math.rad(20)
-local growspeed = 200
-local sizeFactor = 0.8
+local branchAngle = math.pi * 2 / 11
+local growspeed = 20
+local sizeFactor = 0.75
 local maxLayers = 6
 local baseColor = Color3.fromRGB(114, 60, 30)
 local debris = game:GetService('Debris')
@@ -61,19 +61,20 @@ function tree(position, color)
 		food.Size = Vector3.one
 		food.Position = branch.Position
 		food.Anchored = true
-		food.Parent = workspace
+		food.Parent = script
 		task.delay(math.random(10, 40) / growspeed, function()
 			food.Anchored = false
+			food.Parent = workspace
 			food.Position += Vector3.new(math.random(-25, 25), math.random(-10, 10), math.random(-25, 25))
 			food:SetAttribute('isFood', true)
-			table.remove(branches, id)
-			branch:Destroy()
-			for i = 1, 10 do
+			table.remove(branches, id):Destroy()
+			for i = 1, 20 do
 				if #branches > 0 then
-					branches[math.random(1, #branches)]:Destroy()
+					local i = math.random(1, #branches)
+					table.remove(branches, i):Destroy()
 				end
 			end
-			if math.random() < 0.04 then
+			if math.random() < 0.2 then
 				food.Color = leafColor
 				task.delay(math.random(75, 120) / growspeed, function()
 					local ray = workspace:Raycast(food.Position, sunormal * 50)
