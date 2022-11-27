@@ -1,5 +1,6 @@
 local debris = game:GetService('Debris')
 local ts = game:GetService('TweenService')
+local ms = game:GetService('MarketplaceService')
 local images = {
 	'rbxassetid://8834989062',
 	'rbxassetid://6940140256',
@@ -29,6 +30,18 @@ local sounds = {
 	'rbxassetid://5058160717',
 	'rbxasset://sounds/bass.wav',
 }
+
+--[[
+print('Getting random image')
+local i = 0
+repeat
+	local id = math.random(100000000,1000000000)
+	pcall(function()
+		
+	end)
+until i < 10
+print('Ok')
+]]
 
 local board = Instance.new('Part')
 board.Size = Vector3.new(10, 10, 1)

@@ -43,6 +43,12 @@ warning.TextColor3 = Color3.new(1, 1)
 warning.Text = 'FIRE IN THE HOLE'
 warning.Visible = false
 
+local list = Instance.new('ScrollingFrame', frame)
+list.Size = UDim2.fromScale(0.5, 1)
+list.CanvasSize = UDim2.fromScale(1, 5)
+list.BackgroundTransparency = 1
+Instance.new('UIListLayout', list)
+
 local ex = {
 	'explosion',
 	'expand',
@@ -50,40 +56,40 @@ local ex = {
 	'doubleball',
 	'robux',
 	'burst',
-	'duck'
+	'duck',
+	'trailball'
 }
 local eType = 0
-local explosionTypeButton = Instance.new('TextButton', frame)
-explosionTypeButton.Size = UDim2.fromScale(.5, .3)
+local explosionTypeButton = Instance.new('TextButton', list)
+explosionTypeButton.Size = UDim2.fromScale(.5, .1)
+explosionTypeButton.Font = 'Roboto'
 explosionTypeButton.Text = 'EType Unset'
 explosionTypeButton.TextScaled = true
 explosionTypeButton.BackgroundTransparency = 0.9
 explosionTypeButton.TextColor3 = Color3.new(1, 1)
 explosionTypeButton.MouseButton1Click:Connect(function()
-	eType += 1
+	eType = eType + 1
 	eType = ((eType - 1) % #ex) + 1
 	explosionTypeButton.Text = ex[eType]
 end)
 
 local eSize = 0
 local explosionSizeButton = explosionTypeButton:Clone()
-explosionSizeButton.Parent = frame
-explosionSizeButton.Position = UDim2.fromScale(0, 0.3)
+explosionSizeButton.Parent = list
 explosionSizeButton.Text = 'ESize Unset'
 explosionSizeButton.MouseButton1Click:Connect(function()
-	eSize += 1
-	eSize %= 7
+	eSize = eSize + 1
+	eSize = eSize % 13
 	explosionSizeButton.Text = 'S' .. ('|'):rep(eSize)
 end)
 
 local eShots = 0
 local explosionShotsButton = explosionTypeButton:Clone()
-explosionShotsButton.Parent = frame
-explosionShotsButton.Position = UDim2.fromScale(0.5, 0.3)
+explosionShotsButton.Parent = list
 explosionShotsButton.Text = 'EShots Unset'
 explosionShotsButton.MouseButton1Click:Connect(function()
-	eShots += 1
-	eShots %= 7
+	eShots = eShots + 1
+	eShots = eShots % 7
 	explosionShotsButton.Text = 'M' .. ('|'):rep(eShots)
 end)
 
@@ -98,11 +104,10 @@ local em = {
 }
 local eMat = 0
 local explosionMaterialButton = explosionTypeButton:Clone()
-explosionMaterialButton.Parent = frame
-explosionMaterialButton.Position = UDim2.fromScale(0, 0.6)
+explosionMaterialButton.Parent = list
 explosionMaterialButton.Text = 'EMat Unset'
 explosionMaterialButton.MouseButton1Click:Connect(function()
-	eMat += 1
+	eMat = eMat + 1
 	eMat = ((eMat - 1) % #em) + 1
 	explosionMaterialButton.Text = em[eMat]
 end)
@@ -110,6 +115,7 @@ end)
 local spawnButton = explosionSizeButton:Clone()
 spawnButton.Parent = frame
 spawnButton.Position = UDim2.fromScale(0.5, 0)
+spawnButton.Size = UDim2.fromScale(0.5, 0.5)
 spawnButton.Text = 'Spawn'
 spawnButton.MouseButton1Click:Connect(function()
 	_G.firework.prepare(owner.Character.Torso.Position, eSize, eType, eMat, eShots)
@@ -123,7 +129,7 @@ _G.firework = {}
 _G.firework.docs = [[
 firework.prepare ( Vector3 position , int size , int type , int color , int shots )
 Prepare a firework box to be fired. The firework box will be spawned at position.
-The size indicates the size of the explosions, which is usually constrained from 5 to 30.
+The size indicates the size of the explosions, which is usually constrained from 5 to 60.
 The type indicates the type of the explosion:
 1 - Explosion
 2 - Expanding sphere
@@ -132,6 +138,7 @@ The type indicates the type of the explosion:
 5 - Robux (on the XY plane)
 6 - Burst
 7 - Duck (on the XY plane)
+8 - Ball of particles with trail
 The color indicates the color of the explosion:
 1 - Strontium (red)
 2 - Calcium (orange)
@@ -168,6 +175,7 @@ _G.firework.fire = function(pack)
 		local c = pack:GetAttribute('color')
 		local shots = pack:GetAttribute('shots')
 		for i = 1, shots do
+			task.wait(1)
 			task.spawn(function()
 				local pos = pos + Vector3.new(math.random() * 2 - 1, math.random() * 2 - 1, math.random() * 2 - 1) * 5
 				local s = s + (math.random() * 2 - 1) * 3
@@ -243,7 +251,7 @@ _G.firework.fire = function(pack)
 						end)
 					end
 				elseif t == 4 then
-					for i = 1, 30 do
+					for i = 1, 40 do
 						task.spawn(function()
 							local r = CFrame.Angles(0, math.pi * 2 * math.random(), 0).LookVector
 							local p = Instance.new('Part', script)
@@ -254,7 +262,7 @@ _G.firework.fire = function(pack)
 							p.CanCollide = false
 							p.Position = pos
 							p:ApplyImpulse((r + Vector3.yAxis * math.random() * 4) * s * 30)
-							task.wait(3)
+							task.wait(1.5)
 							local pos = p.Position
 							p:Destroy()
 							for i = 1, 30 do
@@ -342,6 +350,29 @@ _G.firework.fire = function(pack)
 					for _, n in next, nduck do
 						p(n[1] - 64, n[2])
 					end
+				elseif t == 8 then
+					for i = 1, 60 do
+						task.spawn(function()
+							local r = CFrame.Angles(0, math.pi * 2 * math.random(), 0).LookVector
+							local p = Instance.new('Part', script)
+							p.Size = Vector3.one * 2
+							p.Transparency = math.random() / 2
+							p.Material = 'Neon'
+							p.Color = color
+							p.CanCollide = false
+							p.Position = pos
+							local t = Instance.new('Trail', p)
+							t.Color = ColorSequence.new(color)
+							local a0 = Instance.new('Attachment', p)
+							a0.Position = -Vector3.yAxis
+							local a1 = Instance.new('Attachment', p)
+							a1.Position = Vector3.yAxis
+							t.Attachment0 = a0
+							t.Attachment1 = a1
+							p:ApplyImpulse((r + Vector3.yAxis * math.random() * 4) * s * 30)
+							debris:AddItem(p, 5)
+						end)
+					end
 				end
 			end)
 		end
@@ -350,7 +381,7 @@ end
 
 local fireButton = spawnButton:Clone()
 fireButton.Parent = frame
-fireButton.Position = UDim2.fromScale(0.5, 0.6)
+fireButton.Position = UDim2.fromScale(0.5, 0.5)
 fireButton.Text = 'Fire (Wifi)'
 fireButton.MouseButton1Click:Connect(function()
 	warning.Visible = true

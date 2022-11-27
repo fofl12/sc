@@ -389,7 +389,7 @@ while true do
 	local success, message = pcall(loaded)
 	if not success then
 		env.outconf(Color3.new(), Color3.new(1, 0, 0))
-		out('[EXEC ERROR: ' .. message or 'NOT SPECIFIED' .. ']\n')
+		out('[EXEC ERROR: ' .. (message or 'NOT SPECIFIED') .. ']\n')
 		env.outconf(Color3.new(), Color3.new(1, 1, 1))
 	end
 end

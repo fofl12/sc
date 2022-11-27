@@ -21,7 +21,7 @@ task.spawn(function()
 	while true do
 		task.wait()
 		if not color then
-			selection.Color3 = Color3.fromHSV(math.sin(os.clock() / 6) / 2 + 1, 1, .3)
+			selection.Color3 = Color3.fromHSV(os.clock() % 6 / 6, 1, .3)
 		else
 			selection.Color3 = color
 		end
