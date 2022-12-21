@@ -3,13 +3,13 @@ local displayed = {{}}
 local offset = owner.Character.Head.Position
 local width = 500
 local height = 300
-local scale = .5
+local scale = .05
 for x = 1, width do -- Initial state
 	--map[1][x] = math.random() < 0.1
 	map[1][x] = x == width / 2
 end
 
-local rule = 110
+local rule = 90
 local function alive(x, y)
 	local l = map[y - 1][x - 1] or false
 	local r = map[y - 1][x + 1] or false
@@ -37,6 +37,9 @@ for y = 1, height do
 			prevPixel.Position += Vector3.new(scale / 2)
 			prevPixel.Size += Vector3.new(scale)
 			displayed[y][x] = prevPixel
+			if x % 16 == 0 then
+				task.wait()
+			end
 			continue
 		end
 		local pixel = Instance.new('WedgePart')

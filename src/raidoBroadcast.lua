@@ -1,261 +1,113 @@
-local CHANNEL = 5
+local CHANNEL = 7
 if not _G['channel' .. CHANNEL] then
 	_G['channel' .. CHANNEL] = Instance.new('BindableEvent')
 end
 
 local function music(Play, W, ping, bass, snap, ping2, speed)
 	bp = 1.6
-	for i = 1,2 do
-		Play(ping,1.32)
-		Play(bass,bp)
-		Play(snap,0.7)
-		W(speed.Value/2)
-		Play(ping,1.32)
-		W(speed.Value/2)
-	end
-	Play(ping,1.8)
-	Play(bass,bp)
-	Play(snap,1)
-	W(speed.Value/2)
-	Play(ping,1.8)
-	W(speed.Value/2)
-	Play(ping,1.8)
-	Play(bass,bp)
-	Play(snap,0.7)
-	W(speed.Value/2)
-	Play(ping,1.8)
-	W(speed.Value/2)
-	Play(bass,bp)
-	Play(snap,0.7)
-	W(speed.Value)
-	Play(bass,bp)
-	Play(snap,0.7)
-	W(speed.Value)
-	Play(bass,bp)
-	Play(snap,1)
-	W(speed.Value)
-	Play(bass,bp)
-	Play(snap,0.7)
-	W(speed.Value)
-	Play(bass,bp)
-	Play(snap,0.7)
-	W(speed.Value)
-	Play(ping,1.32)
-	Play(bass,bp)
-	Play(snap,0.7)
-	W(speed.Value)
-	Play(ping,1.8)
-	Play(bass,bp)
-	Play(snap,1)
-	W(speed.Value)
-	Play(ping,2.1)
-	Play(bass,bp)
-	Play(snap,0.7)
-	W(speed.Value)
-	for i = 1,2 do
-		Play(ping,2.4)
-		Play(bass,bp)
-		Play(snap,0.7)
-		W(speed.Value/2)
-		Play(ping,2.4)
-		W(speed.Value/2)
-	end
-	Play(bass,bp)
-	Play(snap,1)
-	W(speed.Value)
-	Play(ping,2.12)
-	Play(bass,bp)
-	Play(snap,0.7)
-	W(speed.Value)
-	bp = 1.2
-	for i = 1,2 do
-		Play(ping,1.4)
-		Play(bass,bp)
-		Play(snap,0.7)
-		W(speed.Value/2)
-		Play(ping,1.4)
-		W(speed.Value/2)
-	end
-	Play(ping,1.8)
-	Play(bass,bp)
-	Play(snap,1)
-	W(speed.Value/2)
-	Play(ping,1.8)
-	W(speed.Value/2)
-	Play(ping,1.8)
-	Play(bass,bp)
-	Play(snap,0.7)
-	W(speed.Value/2)
-	Play(ping,1.8)
-	W(speed.Value/2)
-	Play(bass,bp)
-	Play(snap,0.7)
-	W(speed.Value)
-	Play(bass,bp)
-	Play(snap,0.7)
-	W(speed.Value)
-	Play(bass,bp)
-	Play(snap,1)
-	W(speed.Value)
-	Play(bass,bp)
-	Play(snap,0.7)
-	W(speed.Value)
-	Play(bass,bp)
-	Play(snap,0.7)
-	W(speed.Value)
-	Play(ping,1.32)
-	Play(bass,bp)
-	Play(snap,0.7)
-	W(speed.Value)
-	Play(ping,1.8)
-	Play(bass,bp)
-	Play(snap,1)
-	W(speed.Value)
-	Play(ping,2.1)
-	Play(bass,bp)
-	Play(snap,0.7)
-	W(speed.Value)
-	for i = 1,2 do
-		Play(ping,2.4)
-		Play(bass,bp)
-		Play(snap,0.7)
-		W(speed.Value/2)
-		Play(ping,2.4)
-		W(speed.Value/2)
-	end
-	Play(bass,bp)
-	Play(snap,1)
-	W(speed.Value)
-	Play(ping,2.12)
-	Play(bass,bp)
-	Play(snap,0.7)
-	W(speed.Value)
-	bp = 1.02
-	for i = 1,2 do
-		Play(ping,1.2)
-		Play(bass,bp)
-		Play(snap,0.7)
-		W(speed.Value/2)
-		Play(ping,1.2)
-		W(speed.Value/2)
-	end
-	Play(ping,1.8)
-	Play(bass,bp)
-	Play(snap,1)
-	W(speed.Value/2)
-	Play(ping,1.8)
-	W(speed.Value/2)
-	Play(ping,1.8)
-	Play(bass,bp)
-	Play(snap,0.7)
-	W(speed.Value/2)
-	Play(ping,1.8)
-	W(speed.Value/2)
-	Play(bass,bp)
-	Play(snap,0.7)
-	W(speed.Value)
-	Play(bass,bp)
-	Play(snap,0.7)
-	W(speed.Value)
-	Play(bass,bp)
-	Play(snap,1)
-	W(speed.Value)
-	Play(bass,bp)
-	Play(snap,0.7)
-	W(speed.Value)
-	Play(bass,bp)
-	Play(snap,0.7)
-	W(speed.Value)
-	Play(ping,1.32)
-	Play(bass,bp)
-	Play(snap,0.7)
-	W(speed.Value)
-	Play(ping,1.8)
-	Play(bass,bp)
-	Play(snap,1)
-	W(speed.Value)
-	Play(ping,2.1)
-	Play(bass,bp)
-	Play(snap,0.7)
-	W(speed.Value)
-	for i = 1,2 do
-		Play(ping,2.4)
-		Play(bass,bp)
-		Play(snap,0.7)
-		W(speed.Value/2)
-		Play(ping,2.4)
-		W(speed.Value/2)
-	end
-	Play(bass,bp)
-	Play(snap,1)
-	W(speed.Value)
-	Play(ping,2.12)
-	Play(bass,bp)
-	Play(snap,0.7)
-	W(speed.Value)
-	bp = 1.15
-	for i = 1,2 do
-		Play(ping,1.32)
-		Play(bass,bp)
-		Play(snap,0.7)
-		W(speed.Value/2)
-		Play(ping,1.32)
-		W(speed.Value/2)
-	end
-	Play(ping,1.8)
-	Play(bass,bp)
-	Play(snap,1)
-	W(speed.Value/2)
-	Play(ping,1.8)
-	W(speed.Value/2)
-	Play(ping,1.8)
-	Play(bass,bp)
-	Play(snap,0.7)
-	W(speed.Value/2)
-	Play(ping,1.8)
-	W(speed.Value/2)
-	Play(bass,bp)
-	Play(snap,0.7)
-	W(speed.Value)
-	Play(bass,bp)
-	Play(snap,0.7)
-	W(speed.Value)
-	Play(bass,bp)
-	Play(snap,1)
-	W(speed.Value)
-	Play(bass,bp)
-	Play(snap,0.7)
-	W(speed.Value)
-	Play(bass,bp)
-	Play(snap,0.7)
-	W(speed.Value)
-	Play(ping,1.32)
-	Play(bass,bp)
-	Play(snap,0.7)
-	W(speed.Value)
-	Play(ping,1.8)
-	Play(bass,bp)
-	Play(snap,1)
-	W(speed.Value)
-	Play(ping,2.1)
-	Play(bass,bp)
-	Play(snap,0.7)
-	W(speed.Value)
-	for i = 1,2 do
-		Play(ping,2.4)
-		Play(bass,bp)
-		Play(snap,0.7)
-		W(speed.Value/2)
-		Play(ping,2.4)
-		W(speed.Value/2)
-	end
-	Play(bass,bp)
-	Play(snap,1)
-	W(speed.Value)
-	Play(ping,2.12)
-	Play(bass,bp)
-	Play(snap,0.7)
-	W(speed.Value)
+		for i = 1,4 do
+			for i = 1,2 do
+				Play(bass,bp)
+				W(speed.Value)
+			end
+			Play(snap,0.7)
+			for i = 1,2 do
+				Play(bass,bp)
+				W(speed.Value)
+			end
+		end
+		bp = 1.2
+		for i = 1,4 do
+			for i = 1,2 do
+				Play(bass,bp)
+				W(speed.Value)
+			end
+			Play(snap,0.7)
+			for i = 1,2 do
+				Play(bass,bp)
+				W(speed.Value)
+			end
+		end
+		bp = 1.02
+		for i = 1,4 do
+			for i = 1,2 do
+				Play(bass,bp)
+				W(speed.Value)
+			end
+			Play(snap,0.7)
+			for i = 1,2 do
+				Play(bass,bp)
+				W(speed.Value)
+			end
+		end
+		bp = 1.15
+		for i = 1,4 do
+			for i = 1,2 do
+				Play(bass,bp)
+				W(speed.Value)
+			end
+			Play(snap,0.7)
+			for i = 1,2 do
+				Play(bass,bp)
+				W(speed.Value)
+			end
+		end
+		bp = 1.6
+		for i = 1,4 do
+			for i = 1,2 do
+				Play(bass,bp)
+				Play(snap,0.7)
+				W(speed.Value)
+			end
+			Play(bass,bp)
+			Play(snap,1)
+			W(speed.Value)
+			Play(bass,bp)
+			Play(snap,0.7)
+			W(speed.Value)
+		end
+		bp = 1.2
+		for i = 1,4 do
+			for i = 1,2 do
+				Play(bass,bp)
+				Play(snap,0.7)
+				W(speed.Value)
+			end
+			Play(bass,bp)
+			Play(snap,1)
+			W(speed.Value)
+			Play(bass,bp)
+			Play(snap,0.7)
+			W(speed.Value)
+		end
+		bp = 1.02
+		for i = 1,4 do
+			for i = 1,2 do
+				Play(bass,bp)
+				Play(snap,0.7)
+				W(speed.Value)
+			end
+			Play(bass,bp)
+			Play(snap,1)
+			W(speed.Value)
+			Play(bass,bp)
+			Play(snap,0.7)
+			W(speed.Value)
+		end
+		bp = 1.15
+		for i = 1,4 do
+			for i = 1,2 do
+				Play(bass,bp)
+				Play(snap,0.7)
+				W(speed.Value)
+			end
+			Play(bass,bp)
+			Play(snap,1)
+			W(speed.Value)
+			Play(bass,bp)
+			Play(snap,0.7)
+			W(speed.Value)
+		end
 end
 
 local awaiting = {}

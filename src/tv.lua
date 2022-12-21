@@ -54,7 +54,7 @@ local frames = {
 		bg.Size = UDim2.fromScale(1, 1)
 		bg.ZIndex = -1
 		local among = Instance.new('ImageLabel', gui)
-		among.ImageId = 'rbxassetid://7037955394'
+		among.Image = 'rbxassetid://7037955394'
 		among.Size = UDim2.fromScale(0.1, 0.1)
 		among.BackgroundTransparency = 1
 
@@ -62,6 +62,14 @@ local frames = {
 			among.Size = UDim2.fromScale(math.random(0.1, 1), math.random(0.1, 1))
 			task.wait(1/10)
 		end
+	end,
+	function()
+		local frame = Instance.new('ScrollingFrame', gui)
+		frame.BackgroundColor3 = Color3.new()
+		frame.Size = UDim2.fromScale(1, 1)
+		frame.CanvasSize = UDim2.fromScale(1, 20)
+		local list = Instance.new('UIListLayout', frame)
+		
 	end
 }
 

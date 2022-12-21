@@ -1,4 +1,4 @@
-local MAXDEPTH = 1
+local MAXDEPTH = 2
 
 local tnode = Instance.new('SpawnLocation')
 tnode.Enabled = false
@@ -43,7 +43,7 @@ local function importFromId(id, idesc, depth)
 			else
 				table.insert(orig.friends, idesc)
 			end
-			if i % 32 == 0 then
+			if i % 512 == 0 then
 				task.wait()
 			end
 		end

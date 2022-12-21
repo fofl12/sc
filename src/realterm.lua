@@ -1,4 +1,5 @@
 local rows, columns = 25, 40
+local autoload = true
 
 local uis = game:service'UserInputService'
 
@@ -116,17 +117,6 @@ local function out(str)
 	end
 end
 
-out('` HI\n')
-out('` MULTI\nLINE\n')
-out('` HJASH#HWTHWQ^Jiw6j3i6j7i3j5i7j5\n')
-out('` PART 1')
-out('PART 2\n')
-for i = 1, 10 do
-	task.wait(0.01)
-	out('` SCROLLING TEST ' .. i .. '\n')
-end
-out('Output tests complete\n')
-out('-- TESTING COMPLETE ' .. string.rep('-', columns - 20) .. '\n')
 out('Welcome to Marcuskernel !\n')
 out('Establishing input connection...\n')
 local remote = Instance.new('RemoteEvent', owner.PlayerGui)
@@ -259,7 +249,7 @@ local function input()
 end
 
 
-out('Initiating REPL...\n')
+out('Initializing Lua REPL...\n')
 local env = {}
 env = {
 	ps = "] ",
@@ -272,9 +262,10 @@ env = {
 		fg = f
 	end,
 	Color3 = Color3,
-	input = function()
+	rawinput = function()
 		return select(2, remote.OnServerEvent:Wait())
 	end,
+	input = input,
 	table = table,
 	tostring = tostring,
 	tonumber = tonumber,
@@ -292,7 +283,7 @@ env = {
 	loadstring = loadstring,
 	getfenv = getfenv,
 	wait = task.wait,
-	ds = function(n)
+	nds = function(n)
 		local dss = game:GetService('DataStoreService')
 		return dss:GetDataStore(n or 'marcuskernel' .. owner.UserId)
 	end,
@@ -310,9 +301,8 @@ env = {
 			end
 		end
 		while running do
-			local i = env.input()
-			local m = i:sub(1, 1)
-			if m == 'w' then
+			local i = env.rawinput()
+			if i == Enum.KeyCode.Up then
 				scroll(1)
 				y = 0
 				line -= 1
@@ -323,7 +313,7 @@ env = {
 					out('\n')
 					print(line)
 				end
-			elseif m == 's' then
+			elseif i == Enum.KeyCode.Down then
 				scroll(-1)
 				y = rows - 1
 				line += 1
@@ -334,21 +324,21 @@ env = {
 					out('\n')
 					print(line)
 				end
-			elseif m == 'q' then
+			elseif i == Enum.KeyCode.Q then
 				running = false
 			end
 		end
 		noline = false
 	end,
-	edit = function(str)
+	eline = function(str)
 		local lines = env[str]:split('\n')
 		local line = 1
-		out('edit - type ? for help\n')
+		out('eline - type ? for help\n')
 		local running = true
 		while running do
 			out('> ')
-			local i = env.input()
-			out(i .. '\n')
+			local i = input()
+			out('\n')
 			local m = i:sub(1, 1)
 			if m == '?' then
 				out('?: get help\nw: write to line\ni: insert line\nr: read line\nrl: read with less\ng: go to line\nz: save\nx: exit\n')
@@ -372,8 +362,40 @@ env = {
 			end
 		end
 		out('Done editing\n')
-	end,
+	end
 }
+if autoload then
+	out('Loading autoload script...\n')
+	env.ds = env.nds()
+	env.autoload = env.ds:GetAsync('autoload')
+	print(env.autoload)
+	if not autoload then
+		env.outconf(Color3.new(), Color3.new(1, 0, 0))
+		out('No autoload script found!\n')
+		env.outconf(Color3.new(), Color3.new(1, 1, 1))
+	else
+		for i, line in next, env.autoload:split('\n') do
+			local loaded = loadstring(line)
+			if loaded then
+				setfenv(loaded, env)
+				local success, message = pcall(loaded)
+				if not success then
+					env.outconf(Color3.new(), Color3.new(1, 0, 0))
+					out('Error in autoload script on line ' .. i .. '\n')
+					print(message)
+					env.outconf(Color3.new(), Color3.new(1, 1, 1))
+					break
+				end
+			else
+				env.outconf(Color3.new(), Color3.new(1, 0, 0))
+				out('Syntax Error in autoload script on line ' .. i .. '!\n')
+				env.outconf(Color3.new(), Color3.new(1, 1, 1))
+				break
+			end
+		end
+	end
+end
+out('Ready\n')
 while true do
 	out(env.ps)
 	local message = input()

@@ -1,4 +1,4 @@
-local TWIST = true
+local TWIST = true -- idk how this works lol
 local RES_X = 160
 local RES_Y = 120
 local PIXEL_SIZE = Vector3.one * 0.1 -- requires RENDER_MODE to be 'Part'

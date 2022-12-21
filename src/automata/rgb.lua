@@ -1,5 +1,5 @@
 local map = {{}}
-local width = 1000
+local width = 200
 local height = 3000
 for x = 1, width do
   map[1][x] = Color3.fromRGB(math.random(0, 255), math.random(0, 255), math.random(0, 255))
@@ -10,6 +10,7 @@ local function simulate(left, right, middle)
     return left
   end
   -- Option 1: diff between lr
+  --[[
   do
 	local leftPoints = 0
 	local rightPoints = 0
@@ -34,9 +35,10 @@ local function simulate(left, right, middle)
 		return right
 	end
   end
-  --[[do -- Option 2: lerp between lmr
-	return left:Lerp(right, 0.5):Lerp(middle, 0.5)
-  end]]
+  ]]
+  do -- Option 2: lerp between lmr
+	return left:Lerp(right, 0.5)
+  end
   do -- Option 3: Random
 	return math.random() < .5 and left or right
   end
