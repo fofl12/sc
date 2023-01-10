@@ -11,10 +11,10 @@ cat.Shape = 'Ball'
 
 local dog = cat:Clone()
 
-local ic, id = 50, 50
+local ic, id = 60, 60
 local range = 1
 local function update()
-	hint.Text = ('CommunicationsRange: %i\n%s\n%s'):format(range, ('cat '):rep(ic), ('dog '):rep(id))
+	hint.Text = ('\n\nCommunicationsRange: %s\n%s\n%s'):format(('h '):rep(math.floor(range / 5)), ('cat '):rep(ic), ('dog '):rep(id))
 end
 update()
 
@@ -61,7 +61,7 @@ for i = 1, ic do -- cats
 			cat:Destroy()
 			dog:Destroy()
 			ic -= 1
-			hint.Text = ('%s\n%s'):format(('cat '):rep(ic), ('dog '):rep(id))
+			update()
 		elseif p:GetAttribute('dog') then
 			p:SetAttribute('hp', p:GetAttribute'hp' - math.random(40, 60))
 			annunciate('c', p, dog.Position)
@@ -85,9 +85,9 @@ for i = 1, id do -- dogs
 			dog:Destroy()
 			cat:Destroy()
 			id -= 1
-			hint.Text = ('%s\n%s'):format(('cat '):rep(ic), ('dog '):rep(id))
+			update()
 		elseif p:GetAttribute('cat') then
-			p:SetAttribute('hp', p:GetAttribute'hp' - math.random(40, 70))
+			p:SetAttribute('hp', p:GetAttribute'hp' - math.random(40, 60))
 			annunciate('d', p, dog.Position)
 		end
 	end)

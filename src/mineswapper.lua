@@ -1,8 +1,14 @@
 local board = {}
 local reality = {}
 local whitelist = {'comsurg'}
+for _, p in next, game:service'Players':GetPlayers() do
+	table.insert(whitelist, p.Name)
+end
 local W, H, M = 20, 20, 60
 local realmines = 0
+local scale = 5
+local lives = 5
+local playing = true
 owner.Chatted:Connect(function(m)
 	if m:sub(1, 2) == 'm%' then
 		local c = m:sub(3, -1):split(' ')
@@ -137,9 +143,6 @@ for _ = 1, M do
 	inc(x+1, y+1)
 end
 
-local scale = 5
-local lives = 3
-local playing = true
 for x = 1, W do
 	reality[x] = {}
 	for y = 1, H do
@@ -169,6 +172,17 @@ for x = 1, W do
 		clicky.Transparency = 1
 		clicky.Anchored = true
 		clicky.Position = offset + Vector3.new(x * scale, height, y * scale)
+		
+		task.spawn(function()
+			while true do
+				local d = task.wait(1/5)
+				hmseed += d / 20000
+				height = (math.noise(x * .1, y * .1, hmseed) + 1) * 8
+				button.Size = Vector3.new(scale, height, scale)
+				button.Position = offset + Vector3.new(x * scale, height / 2, y * scale)
+				clicky.Position = offset + Vector3.new(x * scale, height, y * scale)
+			end
+		end)
 
 		local clicker = Instance.new('ClickDetector', clicky)
 
